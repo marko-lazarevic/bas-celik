@@ -14,6 +14,7 @@ import (
 	"github.com/ubavic/bas-celik/v2/document"
 )
 
+// GEMALTO_ATR_1 is the Answer To Reset sequence for Gemalto ID cards (original version).
 var GEMALTO_ATR_1 = Atr([]byte{
 	0x3B, 0xFF, 0x94, 0x00, 0x00, 0x81, 0x31, 0x80,
 	0x43, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x02,
@@ -21,21 +22,21 @@ var GEMALTO_ATR_1 = Atr([]byte{
 	0x79,
 })
 
-// Available since January 2023 (maybe). Replaced very soon with an even newer version.
+// GEMALTO_ATR_2 is available since January 2023 (maybe). Replaced very soon with an even newer version.
 var GEMALTO_ATR_2 = Atr([]byte{
 	0x3B, 0xF9, 0x96, 0x00, 0x00, 0x80, 0x31, 0xFE,
 	0x45, 0x53, 0x43, 0x45, 0x37, 0x20, 0x47, 0x43,
 	0x4E, 0x33, 0x5E,
 })
 
-// Available since July 2023.
+// GEMALTO_ATR_3 is available since July 2023.
 var GEMALTO_ATR_3 = Atr([]byte{
 	0x3B, 0x9E, 0x96, 0x80, 0x31, 0xFE, 0x45, 0x53,
 	0x43, 0x45, 0x20, 0x38, 0x2E, 0x30, 0x2D, 0x43,
 	0x31, 0x56, 0x30, 0x0D, 0x0A, 0x6F,
 })
 
-// Available since June 2024.
+// GEMALTO_ATR_4 is available since June 2024.
 var GEMALTO_ATR_4 = Atr([]byte{
 	0x3B, 0x9E, 0x96, 0x80, 0x31, 0xFE, 0x45, 0x53,
 	0x43, 0x45, 0x20, 0x38, 0x2E, 0x30, 0x2D, 0x43,
@@ -54,6 +55,7 @@ type Gemalto struct {
 	certificates  []*x509.Certificate
 }
 
+// InitCard initializes the Gemalto card by selecting the appropriate applet.
 func (card *Gemalto) InitCard() error {
 	data := []byte{0xF3, 0x81, 0x00, 0x00, 0x02, 0x53, 0x45, 0x52, 0x49, 0x44, 0x01}
 	apu := buildAPDU(0x00, 0xA4, 0x04, 0x00, data, 0)
@@ -91,6 +93,7 @@ func (card *Gemalto) InitCard() error {
 	return fmt.Errorf("initializing identity document card: unknown card type")
 }
 
+// ReadCard reads all files from the Gemalto card.
 func (card *Gemalto) ReadCard() error {
 	var err error
 
@@ -119,25 +122,26 @@ func (card *Gemalto) ReadCard() error {
 	return nil
 }
 
+// GetDocument parses and returns the ID document from the Gemalto card.
 func (card *Gemalto) GetDocument() (document.Document, error) {
-	doc := document.IdDocument{}
+	doc := document.IDDocument{}
 
-	err := parseIdDocumentFile(card.documentFile, &doc)
+	err := parseIDDocumentFile(card.documentFile, &doc)
 	if err != nil {
 		return nil, fmt.Errorf("parsing document file: %w", err)
 	}
 
-	err = parseIdPersonalFile(card.personalFile, &doc)
+	err = parseIDPersonalFile(card.personalFile, &doc)
 	if err != nil {
 		return nil, fmt.Errorf("parsing personal file: %w", err)
 	}
 
-	err = parseIdResidenceFile(card.residenceFile, &doc)
+	err = parseIDResidenceFile(card.residenceFile, &doc)
 	if err != nil {
 		return nil, fmt.Errorf("parsing residence file: %w", err)
 	}
 
-	err = parseAndAssignIdPhotoFile(card.photoFile, &doc)
+	err = parseAndAssignIDPhotoFile(card.photoFile, &doc)
 	if err != nil {
 		return nil, fmt.Errorf("parsing photo file: %w", err)
 	}
@@ -145,10 +149,12 @@ func (card *Gemalto) GetDocument() (document.Document, error) {
 	return &doc, nil
 }
 
+// Atr returns the Answer To Reset of the Gemalto card.
 func (card *Gemalto) Atr() Atr {
 	return card.atr
 }
 
+// ReadFile reads a file from the Gemalto card.
 func (card *Gemalto) ReadFile(name []byte) ([]byte, error) {
 	output := make([]byte, 0)
 
@@ -237,6 +243,7 @@ func (card *Gemalto) selectFile(name []byte, selectionMethod, selectionOption by
 	return rsp, nil
 }
 
+// Test verifies whether the Gemalto card can be read.
 func (card *Gemalto) Test() bool {
 	err := card.InitCard()
 	if err != nil {
@@ -247,7 +254,7 @@ func (card *Gemalto) Test() bool {
 	return err == nil
 }
 
-// Initialize card's cryptography application
+// InitCrypto initializes the card's cryptography application by selecting the PKCS-15 applet.
 func (card *Gemalto) InitCrypto() error {
 	aid := []byte{0xA0, 0x00, 0x00, 0x00, 0x63, 0x50, 0x4B, 0x43, 0x53, 0x2D, 0x31, 0x35}
 
@@ -263,8 +270,7 @@ func (card *Gemalto) InitCrypto() error {
 	return nil
 }
 
-// Returns number of tries left, and occurred error.
-// -1 signifies unknown number of tries left
+// ChangePin changes the card's PIN from oldPin to newPin and returns the number of tries left (-1 if unknown) and any error encountered.
 func (card *Gemalto) ChangePin(newPin, oldPin string) (int, error) {
 	err := card.smartCard.BeginTransaction()
 	if err != nil {
@@ -318,6 +324,7 @@ func (card *Gemalto) ChangePin(newPin, oldPin string) (int, error) {
 	return -1, nil
 }
 
+// ReadSignatures reads the two signature files from the Gemalto card.
 func (card *Gemalto) ReadSignatures() error {
 	rsp, err := card.ReadFile([]byte{0x0F, 0x1C})
 	if err != nil {
@@ -334,6 +341,7 @@ func (card *Gemalto) ReadSignatures() error {
 	return nil
 }
 
+// LoadCertificates loads and parses the X.509 certificates from the Gemalto card's cryptography application.
 func (card *Gemalto) LoadCertificates() error {
 	if card.certificates != nil {
 		return nil
@@ -393,6 +401,7 @@ func (card *Gemalto) LoadCertificates() error {
 	return errors.Join(allErrors...)
 }
 
+// GetCertificates returns the list of certificates stored on the Gemalto card.
 func (card *Gemalto) GetCertificates() []x509.Certificate {
 	certs := make([]x509.Certificate, 0, len(card.certificates))
 

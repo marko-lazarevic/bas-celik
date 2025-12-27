@@ -10,6 +10,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// CreateExcel creates an Excel file from the given document struct.
 func CreateExcel(document any) ([]byte, error) {
 	structType := reflect.TypeOf(document)
 	structVal := reflect.ValueOf(document)
@@ -32,9 +33,15 @@ func CreateExcel(document any) ([]byte, error) {
 
 	currentRow := 1
 	putData := func(label, value string) {
-		f.SetCellValue("Sheet1", fmt.Sprintf("A%d", currentRow), label)
-		f.SetCellValue("Sheet1", fmt.Sprintf("B%d", currentRow), value)
-		currentRow += 1
+		err = f.SetCellValue("Sheet1", fmt.Sprintf("A%d", currentRow), label)
+		if err != nil {
+			return
+		}
+		err = f.SetCellValue("Sheet1", fmt.Sprintf("B%d", currentRow), value)
+		if err != nil {
+			return
+		}
+		currentRow++
 	}
 
 	fields := reflect.VisibleFields(structType)

@@ -12,13 +12,13 @@ import (
 func connectToCard(selectedReader string, ctx *scard.Context) {
 	state.mu.Lock()
 	state.cardDocument = nil
-	state.cryptoUi = nil
+	state.cryptoUI = nil
 	state.certs = nil
 	state.selectedCert = -1
 	state.mu.Unlock()
 
-	state.cryptoUiContainer.Hide()
-	state.cryptoUiContainer.RemoveAll()
+	state.cryptoUIContainer.Hide()
+	state.cryptoUIContainer.RemoveAll()
 
 	readers, _ := ctx.ListReaders()
 	if selectedReader == "" || len(readers) == 0 {
@@ -33,7 +33,7 @@ func connectToCard(selectedReader string, ctx *scard.Context) {
 		err = sCard.BeginTransaction()
 		if err == nil {
 			tryToProcessCard(sCard)
-			sCard.EndTransaction(scard.LeaveCard)
+			_ = sCard.EndTransaction(scard.LeaveCard)
 			return
 		}
 	}

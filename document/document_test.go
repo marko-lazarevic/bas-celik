@@ -27,9 +27,16 @@ func setDocumentConfigFromLocalFiles(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	document.Configure(documentConfig)
+	err = document.Configure(documentConfig)
+
+	if err != nil {
+		t.Fatalf("setting document config: %v", err)
+	}
 }
 
 func unsetDocumentConfig() {
-	document.Configure(document.DocumentConfig{})
+	err := document.Configure(document.DocumentConfig{})
+	if err != nil {
+		panic(err)
+	}
 }

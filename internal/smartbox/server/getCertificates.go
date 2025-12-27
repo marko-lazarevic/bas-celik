@@ -10,15 +10,18 @@ import (
 	"github.com/ubavic/bas-celik/v2/internal/smartbox/pkcs11"
 )
 
+// GetCertificatesInput represents the input parameters for retrieving certificates from a smart card terminal.
 type GetCertificatesInput struct {
-	TerminalId int    `json:"terminalId"`
+	TerminalID int    `json:"terminalId"`
 	Pin        string `json:"pin"`
 }
 
+// GetCertificatesPayload represents the response payload containing a list of certificate aliases.
 type GetCertificatesPayload struct {
 	Certificates []CertificateAlias `json:"certificates"`
 }
 
+// CertificateAlias represents a certificate with its alias and common name.
 type CertificateAlias struct {
 	Alias string `json:"alias"`
 	Name  string `json:"name"`
@@ -34,7 +37,7 @@ func (s *SmartBoxServer) handleGetCertificates(session *SmartboxSession, data []
 		return fmt.Errorf("pkcs11 module not loaded")
 	}
 
-	err := session.module.OpenSessionAndLogin(msg.Input.Pin, msg.Input.TerminalId)
+	err := session.module.OpenSessionAndLogin(msg.Input.Pin, msg.Input.TerminalID)
 	if err != nil {
 		return err
 	}
@@ -54,6 +57,7 @@ func (s *SmartBoxServer) handleGetCertificates(session *SmartboxSession, data []
 	return json.NewEncoder(w).Encode(rsp)
 }
 
+// GetValidCertificates filters a list of certificates and returns only those that are currently valid based on their validity period.
 func GetValidCertificates(namedCerts []pkcs11.NamedCert) []pkcs11.NamedCert {
 	now := time.Now()
 
@@ -73,11 +77,12 @@ func GetValidCertificates(namedCerts []pkcs11.NamedCert) []pkcs11.NamedCert {
 	return validNamedCertificates
 }
 
+// GetCertificateAliases converts a list of named certificates into a list of certificate aliases containing ID and common name.
 func GetCertificateAliases(namedCerts []pkcs11.NamedCert) []CertificateAlias {
 	aliases := make([]CertificateAlias, 0, len(namedCerts))
 	for _, namedCert := range namedCerts {
 		alias := CertificateAlias{
-			Alias: hex.EncodeToString(namedCert.Id),
+			Alias: hex.EncodeToString(namedCert.ID),
 			Name:  namedCert.Certificate.Subject.CommonName,
 		}
 		aliases = append(aliases, alias)

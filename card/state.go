@@ -6,6 +6,7 @@ import (
 	"github.com/ebfe/scard"
 )
 
+// FormatState formats the smart card state flags as a human-readable string.
 func FormatState(state scard.StateFlag) string {
 	states := []string{}
 

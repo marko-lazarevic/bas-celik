@@ -20,7 +20,7 @@ import (
 )
 
 func cryptoList() {
-	if state.cryptoUiContainer.Visible() {
+	if state.cryptoUIContainer.Visible() {
 		return
 	}
 
@@ -28,11 +28,11 @@ func cryptoList() {
 
 	createCryptoUI()
 
-	if state.cryptoUi != nil {
+	if state.cryptoUI != nil {
 		state.startPage.Hide()
-		state.documentUiMainContainer.Hide()
-		state.cryptoUiContainer.Add(state.cryptoUi)
-		state.cryptoUiContainer.Show()
+		state.documentUIMainContainer.Hide()
+		state.cryptoUIContainer.Add(state.cryptoUI)
+		state.cryptoUIContainer.Show()
 	}
 
 	state.mu.Unlock()
@@ -44,7 +44,7 @@ func createCryptoUI() {
 
 	gemaltoCard, ok := state.cardDocument.(*card.Gemalto)
 	if !ok {
-		state.cryptoUi = nil
+		state.cryptoUI = nil
 		setStatus("crypto.wrongCard", fmt.Errorf("card could not be casted to Gemalto card"))
 		return
 	}
@@ -88,7 +88,7 @@ func createCryptoUI() {
 	}
 
 	buttons := []fyne.CanvasObject{}
-	exitButton := widget.NewButtonWithIcon(t("crypto.return"), theme.NavigateBackIcon(), closeCryptoUi)
+	exitButton := widget.NewButtonWithIcon(t("crypto.return"), theme.NavigateBackIcon(), closeCryptoUI)
 	changePinButton := widget.NewButton(t("crypto.changePin"), pinChange())
 	buttons = append(buttons, exitButton, layout.NewSpacer(), changePinButton)
 
@@ -101,7 +101,7 @@ func createCryptoUI() {
 
 	canvasObjects = append(canvasObjects, layout.NewSpacer(), buttonBar)
 
-	state.cryptoUi = container.New(layout.NewVBoxLayout(), canvasObjects...)
+	state.cryptoUI = container.New(layout.NewVBoxLayout(), canvasObjects...)
 }
 
 func renderCertSelector(selectCert func(int)) fyne.CanvasObject {
@@ -258,11 +258,11 @@ func saveCert() {
 	dialog.Show()
 }
 
-func closeCryptoUi() {
+func closeCryptoUI() {
 	state.mu.Lock()
-	state.cryptoUiContainer.Hide()
-	state.documentUiMainContainer.Show()
-	state.cryptoUiContainer.RemoveAll()
+	state.cryptoUIContainer.Hide()
+	state.documentUIMainContainer.Show()
+	state.cryptoUIContainer.RemoveAll()
 	state.mu.Unlock()
 }
 

@@ -89,11 +89,12 @@ func pinForm() {
 				dialog.ShowInformation(t("pinChange.title"), message, state.window)
 				logger.Error(err)
 				return
-			} else {
-				pinDialog.Hide()
-				dialog.ShowInformation(t("pinChange.title"), t("pinChange.success"), state.window)
-				logger.Info("pin changed")
 			}
+
+			pinDialog.Hide()
+			dialog.ShowInformation(t("pinChange.title"), t("pinChange.success"), state.window)
+			logger.Info("pin changed")
+
 			reader.RestartReaderPoler()
 		},
 		CancelText: t("pinChange.cancel"),

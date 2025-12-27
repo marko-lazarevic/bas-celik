@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ubavic/bas-celik/v2/card/cardErrors"
+	"github.com/ubavic/bas-celik/v2/card/carderrors"
 )
 
 func Test_parseVehicleCardFileSize(t *testing.T) {
@@ -16,11 +16,11 @@ func Test_parseVehicleCardFileSize(t *testing.T) {
 	}{
 		{
 			data:          []byte{},
-			expectedError: cardErrors.ErrInvalidLength,
+			expectedError: carderrors.ErrInvalidLength,
 		},
 		{
 			data:          []byte{0x01, 0x02, 0x03, 0x04},
-			expectedError: cardErrors.ErrInvalidLength,
+			expectedError: carderrors.ErrInvalidLength,
 		},
 		{
 			data: []byte{
@@ -28,7 +28,7 @@ func Test_parseVehicleCardFileSize(t *testing.T) {
 				0x18, 0x65, 0x56, 0x4C, 0x2D, 0x30, 0x30, 0x31,
 				0x72,
 			},
-			expectedError: cardErrors.ErrInvalidLength,
+			expectedError: carderrors.ErrInvalidLength,
 		},
 		{
 			data: []byte{
@@ -42,7 +42,7 @@ func Test_parseVehicleCardFileSize(t *testing.T) {
 		},
 		{
 			data:          []byte{0x01, 0x01, 0x01, 0x00, 0x80},
-			expectedError: cardErrors.ErrInvalidFormat,
+			expectedError: carderrors.ErrInvalidFormat,
 		},
 	}
 
@@ -61,5 +61,4 @@ func Test_parseVehicleCardFileSize(t *testing.T) {
 			}
 		}
 	}
-
 }

@@ -1,3 +1,4 @@
+// Package server implements the SmartBox server functionality.
 package server
 
 import (
@@ -9,16 +10,19 @@ import (
 	"github.com/ubavic/bas-celik/v2/internal/smartbox/pkcs11"
 )
 
+// GetTerminalsInput represents the input for the GetTerminals request.
 type GetTerminalsInput struct {
-	ProviderId stringOrInt `json:"providerId"`
+	ProviderID stringOrInt `json:"providerId"`
 }
 
+// GetTerminalsPayload represents the payload for the GetTerminals response.
 type GetTerminalsPayload struct {
 	Terminals []Terminal `json:"terminals"`
 }
 
+// Terminal represents a smart card terminal.
 type Terminal struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -28,7 +32,7 @@ func (s *SmartBoxServer) handleGetTerminals(session *SmartboxSession, data []byt
 		return err
 	}
 
-	providerID := msg.Input.ProviderId
+	providerID := msg.Input.ProviderID
 
 	if providerID < 0 || int(providerID) > int(pkcs11.CardVendorPks) {
 		return fmt.Errorf("invalid provider id")
@@ -50,15 +54,15 @@ func (s *SmartBoxServer) handleGetTerminals(session *SmartboxSession, data []byt
 	session.vendor = pkcs11.CardVendor(providerID)
 	session.module = &module
 
-	slotIds, slotNames, err := module.ListSlots()
+	slotIDs, slotNames, err := module.ListSlots()
 	if err != nil {
 		return err
 	}
 
-	terminals := make([]Terminal, 0, len(slotIds))
-	for i, id := range slotIds {
+	terminals := make([]Terminal, 0, len(slotIDs))
+	for i, id := range slotIDs {
 		terminals = append(terminals, Terminal{
-			Id:   fmt.Sprintf("%d", id),
+			ID:   fmt.Sprintf("%d", id),
 			Name: slotNames[i],
 		})
 	}

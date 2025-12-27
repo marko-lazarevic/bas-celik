@@ -6,19 +6,21 @@ import (
 	"io"
 )
 
+// GetInfoInput represents the input parameters for the getInfo operation.
 type GetInfoInput struct {
 	SbSession string `json:"sbSession"`
 	Language  string `json:"language"`
 	Host      string `json:"host"`
 }
 
+// GetInfoPayload represents the response payload for the getInfo operation.
 type GetInfoPayload struct {
-	TerminalId    int    `json:"terminalId"`
-	ProviderId    int    `json:"providerId"`
-	CertificateId string `json:"certificateId"`
+	TerminalID    int    `json:"terminalId"`
+	ProviderID    int    `json:"providerId"`
+	CertificateID string `json:"certificateId"`
 }
 
-func (s *SmartBoxServer) handleGetInfo(sessionId *string, data []byte, w io.Writer) error {
+func (s *SmartBoxServer) handleGetInfo(sessionID *string, data []byte, w io.Writer) error {
 	msg := Message[GetInfoInput]{}
 	if err := json.Unmarshal(data, &msg); err != nil {
 		return err
@@ -35,14 +37,14 @@ func (s *SmartBoxServer) handleGetInfo(sessionId *string, data []byte, w io.Writ
 		}
 	}
 
-	*sessionId = msg.Input.SbSession
+	*sessionID = msg.Input.SbSession
 
 	rsp := Response[GetInfoPayload]{
 		Operation: operationGetInfo,
 		Payload: GetInfoPayload{
-			TerminalId:    session.terminalId,
-			ProviderId:    int(session.vendor),
-			CertificateId: session.certificateId,
+			TerminalID:    session.terminalID,
+			ProviderID:    int(session.vendor),
+			CertificateID: session.certificateID,
 		},
 	}
 

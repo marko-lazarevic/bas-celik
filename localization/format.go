@@ -1,30 +1,30 @@
+// Package localization provides localization formatting functions.
 package localization
 
 import "strings"
 
+// FormatYesNo returns the localized string for a boolean value
 func FormatYesNo(a bool, script Language) string {
-	if script == SrLatin {
+	switch script {
+	case SrLatin:
 		if a {
 			return "Da"
-		} else {
-			return "Ne"
 		}
-	} else if script == SrCyrillic {
+		return "Ne"
+	case SrCyrillic:
 		if a {
 			return "Да"
-		} else {
-			return "Не"
 		}
-	} else {
+		return "Не"
+	default:
 		if a {
 			return "Yes"
-		} else {
-			return "No"
 		}
+		return "No"
 	}
 }
 
-// Expects a pointer to a date in the format DDMMYYYY.
+// FormatDate expects a pointer to a date in the format DDMMYYYY.
 // Modifies, in place, date to format DD.MM.YYYY.
 func FormatDate(in *string) {
 	chars := strings.Split(*in, "")
@@ -38,7 +38,7 @@ func FormatDate(in *string) {
 	*in = chars[0] + chars[1] + "." + chars[2] + chars[3] + "." + chars[4] + chars[5] + chars[6] + chars[7] + "."
 }
 
-// Expects a pointer to a date in the format YYYYMMDD.
+// FormatDateYMD expects a pointer to a date in the format YYYYMMDD.
 // Modifies, in place, date to format DD.MM.YYYY.
 func FormatDateYMD(in *string) {
 	chars := strings.Split(*in, "")
@@ -48,7 +48,7 @@ func FormatDateYMD(in *string) {
 	*in = chars[6] + chars[7] + "." + chars[4] + chars[5] + "." + chars[0] + chars[1] + chars[2] + chars[3]
 }
 
-// Joins list of strings into a single string
+// JoinWithComma joins a list of strings into a single string
 // separating them with a comma and a space.
 // Empty strings are skipped.
 func JoinWithComma(strs ...string) string {

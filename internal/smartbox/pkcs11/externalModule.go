@@ -1,3 +1,4 @@
+// Package pkcs11 provides a wrapper around PKCS#11 modules for smart card interactions.
 package pkcs11
 
 import (
@@ -9,12 +10,13 @@ import (
 	"github.com/miekg/pkcs11"
 )
 
+// NamedCert represents a certificate with its associated ID.
 type NamedCert struct {
-	Id          []byte
+	ID          []byte
 	Certificate *x509.Certificate
 }
 
-// wrapper around pkcs11.SessionHandle
+// PkcsModuleSession is a wrapper around pkcs11.SessionHandle
 // caches module certificates
 type PkcsModuleSession struct {
 	context *pkcs11.Ctx
@@ -22,7 +24,7 @@ type PkcsModuleSession struct {
 	certs   []NamedCert
 }
 
-// wrapper around pkcs11.Ctx
+// pkcsModuleCtx is a wrapper around pkcs11.Ctx
 // it is used only for reference counting
 type pkcsModuleCtx struct {
 	context  *pkcs11.Ctx
@@ -35,6 +37,7 @@ func init() {
 	gModuleContexts = make(map[string]pkcsModuleCtx)
 }
 
+// NewPkcsExternalModule creates a new PkcsModuleSession for the given module path.
 func NewPkcsExternalModule(modulePath string) (PkcsModuleSession, error) {
 	mc, ok := gModuleContexts[modulePath]
 	if !ok {
@@ -48,19 +51,20 @@ func NewPkcsExternalModule(modulePath string) (PkcsModuleSession, error) {
 		mc = pkcsModuleCtx{context: pkcsCtx}
 	}
 
-	mc.refCount += 1
+	mc.refCount++
 	gModuleContexts[modulePath] = mc
 
 	return PkcsModuleSession{context: mc.context}, nil
 }
 
+// ListSlots lists the available slots with tokens in the PKCS#11 module.
 func (pm *PkcsModuleSession) ListSlots() ([]uint, []string, error) {
 	slots, err := pm.context.GetSlotList(true)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get slot list: %w", err)
 	}
 
-	slotIds := make([]uint, 0, len(slots))
+	slotIDs := make([]uint, 0, len(slots))
 	slotNames := make([]string, 0, len(slots))
 
 	for _, slot := range slots {
@@ -76,19 +80,20 @@ func (pm *PkcsModuleSession) ListSlots() ([]uint, []string, error) {
 			continue
 		}
 
-		slotIds = append(slotIds, slot)
+		slotIDs = append(slotIDs, slot)
 		slotNames = append(slotNames, info.SlotDescription)
 	}
 
-	return slotIds, slotNames, nil
+	return slotIDs, slotNames, nil
 }
 
-func (pm *PkcsModuleSession) OpenSessionAndLogin(pin string, slotId int) error {
-	if slotId < 0 {
-		return fmt.Errorf("invalid slot id: %d", slotId)
+// OpenSessionAndLogin opens a session on the specified slot and logs in with the provided PIN.
+func (pm *PkcsModuleSession) OpenSessionAndLogin(pin string, slotID int) error {
+	if slotID < 0 {
+		return fmt.Errorf("invalid slot id: %d", slotID)
 	}
 
-	session, err := pm.context.OpenSession(uint(slotId), pkcs11.CKF_SERIAL_SESSION|pkcs11.CKF_RW_SESSION)
+	session, err := pm.context.OpenSession(uint(slotID), pkcs11.CKF_SERIAL_SESSION|pkcs11.CKF_RW_SESSION)
 	if err != nil {
 		pm.context.Destroy()
 		return fmt.Errorf("failed to open PKCS#11 session: %w", err)
@@ -96,7 +101,7 @@ func (pm *PkcsModuleSession) OpenSessionAndLogin(pin string, slotId int) error {
 
 	err = pm.context.Login(session, pkcs11.CKU_USER, pin)
 	if err != nil {
-		pm.context.CloseSession(session)
+		_ = pm.context.CloseSession(session)
 		pm.context.Destroy()
 		return fmt.Errorf("failed to login to smart card: %w", err)
 	}
@@ -148,6 +153,7 @@ func (pm *PkcsModuleSession) getRawCertificates() ([][]byte, [][]byte, error) {
 	return ids, certificates, errors.Join(allErrors...)
 }
 
+// GetCertificates retrieves and caches the certificates from the PKCS#11 module.
 func (pm *PkcsModuleSession) GetCertificates() ([]NamedCert, error) {
 	if len(pm.certs) > 0 {
 		return pm.certs, nil
@@ -167,12 +173,13 @@ func (pm *PkcsModuleSession) GetCertificates() ([]NamedCert, error) {
 			continue
 		}
 
-		pm.certs = append(pm.certs, NamedCert{Certificate: cert, Id: ids[i]})
+		pm.certs = append(pm.certs, NamedCert{Certificate: cert, ID: ids[i]})
 	}
 
 	return pm.certs, errors.Join(allErrors...)
 }
 
+// CloseSession closes the PKCS#11 session and releases the module context if no more sessions are using it.
 func (pm *PkcsModuleSession) CloseSession() error {
 	err1 := pm.context.Logout(pm.session)
 	err2 := pm.context.CloseSession(pm.session)
@@ -195,10 +202,11 @@ func (pm *PkcsModuleSession) CloseSession() error {
 	return errors.Join(err1, err2)
 }
 
-func (pm *PkcsModuleSession) Sign(certId []byte, message []byte) ([]byte, error) {
+// Sign signs the given message using the private key associated with the specified certificate ID.
+func (pm *PkcsModuleSession) Sign(certID []byte, message []byte) ([]byte, error) {
 	err := pm.context.FindObjectsInit(pm.session, []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_PRIVATE_KEY),
-		pkcs11.NewAttribute(pkcs11.CKA_ID, certId),
+		pkcs11.NewAttribute(pkcs11.CKA_ID, certID),
 	})
 	if err != nil {
 		log.Fatalf("Failed to initialize private key search: %v", err)
@@ -208,7 +216,10 @@ func (pm *PkcsModuleSession) Sign(certId []byte, message []byte) ([]byte, error)
 	if err != nil || len(objects) == 0 {
 		log.Fatalf("Private key not found")
 	}
-	pm.context.FindObjectsFinal(pm.session)
+	err = pm.context.FindObjectsFinal(pm.session)
+	if err != nil {
+		return nil, err
+	}
 
 	mech := []*pkcs11.Mechanism{
 		pkcs11.NewMechanism(pkcs11.CKM_SHA256_RSA_PKCS, nil),

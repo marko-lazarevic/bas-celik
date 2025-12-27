@@ -1,15 +1,23 @@
+// Package pkcs11 provides utilities for handling PKCS#11 card vendors and their library paths.
 package pkcs11
 
+// CardVendor represents different PKCS#11 card vendors.
 type CardVendor int
 
 const (
+	// CardVendorHalcom represents Halcom CA.
 	CardVendorHalcom = CardVendor(iota)
+	// CardVendorPosta represents Sertifikaciono telo Pošte.
 	CardVendorPosta
+	// CardVendorEsmart represents E-Smart Systems d.o.o. Beograd (ESS QCA).
 	CardVendorEsmart
+	// CardVendorMup represents Ministarstvo unutrašnjih poslova CA.
 	CardVendorMup
+	// CardVendorPks represents Privredna komora Srbije CA.
 	CardVendorPks
 )
 
+// String returns the string representation of the CardVendor.
 func (cv CardVendor) String() string {
 	switch cv {
 	case CardVendorHalcom:
@@ -27,6 +35,7 @@ func (cv CardVendor) String() string {
 	}
 }
 
+// GetDefaultPath returns the default PKCS#11 library path for the given card vendor and operating system.
 func GetDefaultPath(cv CardVendor, os string) string {
 	if os == "linux" {
 		switch cv {

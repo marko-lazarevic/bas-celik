@@ -38,17 +38,21 @@ func Test_descramble(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("Case %d", i),
 			func(t *testing.T) {
+				if i < 0 {
+					t.Errorf("Invalid negative test case index %d", i)
+				}
+				idx := uint(i)
 				decoded, err := hex.DecodeString(testCase.data)
 				if err != nil {
 					t.Errorf("Unexpected error %v", err)
 				}
 
 				fields := make(map[uint][]byte, 0)
-				fields[uint(i)] = decoded
+				fields[idx] = decoded
 
-				descramble(fields, uint(i))
-				if !slices.Equal(fields[uint(i)], []byte(testCase.expectedData)) {
-					t.Errorf("Got %s, but expected %s", string(fields[uint(i)]), testCase.expectedData)
+				descramble(fields, idx)
+				if !slices.Equal(fields[idx], []byte(testCase.expectedData)) {
+					t.Errorf("Got %s, but expected %s", string(fields[idx]), testCase.expectedData)
 				}
 			},
 		)

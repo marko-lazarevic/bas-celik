@@ -1,17 +1,18 @@
+// Package tlv provides functions for parsing TLV (Tag-Length-Value) encoded data.
 package tlv
 
 import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/ubavic/bas-celik/v2/card/cardErrors"
+	"github.com/ubavic/bas-celik/v2/card/carderrors"
 )
 
-// Parses simple TLV-encoded data and returns a map of tags to values.
+// ParseTLV parses simple TLV-encoded data and returns a map of tags to values.
 // It assumes that tag and length are encoded with two bytes each.
 func ParseTLV(data []byte) (map[uint][]byte, error) {
 	if len(data) == 0 {
-		return nil, cardErrors.ErrInvalidLength
+		return nil, carderrors.ErrInvalidLength
 	}
 
 	m := make(map[uint][]byte)
@@ -19,7 +20,7 @@ func ParseTLV(data []byte) (map[uint][]byte, error) {
 
 	for {
 		if uint(len(data)) <= offset+4 {
-			return nil, fmt.Errorf("parsing TLV record tag and length: %w", cardErrors.ErrInvalidLength)
+			return nil, fmt.Errorf("parsing TLV record tag and length: %w", carderrors.ErrInvalidLength)
 		}
 
 		tag := uint(binary.LittleEndian.Uint16(data[offset:]))
@@ -28,7 +29,7 @@ func ParseTLV(data []byte) (map[uint][]byte, error) {
 		offset += 4
 
 		if offset+length > uint(len(data)) {
-			return nil, fmt.Errorf("parsing TLV record data: %w", cardErrors.ErrInvalidLength)
+			return nil, fmt.Errorf("parsing TLV record data: %w", carderrors.ErrInvalidLength)
 		}
 
 		value := data[offset : offset+length]
@@ -43,7 +44,7 @@ func ParseTLV(data []byte) (map[uint][]byte, error) {
 	return m, nil
 }
 
-// Assigns the value from the provided fields map to the target string, based on the specified tag.
+// AssignField assigns the value from the provided fields map to the target string, based on the specified tag.
 // If the tag is not present in the map, the target is set to an empty string.
 func AssignField[T comparable](fields map[T][]byte, tag T, target *string) {
 	val, ok := fields[tag]
@@ -54,7 +55,7 @@ func AssignField[T comparable](fields map[T][]byte, tag T, target *string) {
 	}
 }
 
-// Assigns a boolean value from the provided fields map to the target, based on the specified tag.
+// AssignBoolField assigns a boolean value from the provided fields map to the target, based on the specified tag.
 // If the tag is not present in the map or the value is not 0x31, the target is set to false.
 func AssignBoolField(fields map[uint][]byte, tag uint, target *bool) {
 	val, ok := fields[tag]

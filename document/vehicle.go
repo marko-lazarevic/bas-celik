@@ -10,7 +10,7 @@ import (
 	"github.com/signintech/gopdf"
 )
 
-// Represents a document stored on a Serbian vehicle card.
+// VehicleDocument represents a document stored on a Serbian vehicle card.
 // Fields are named according to official API.
 type VehicleDocument struct {
 	AuthorityIssuing            string
@@ -19,7 +19,7 @@ type VehicleDocument struct {
 	CompetentAuthority          string
 	DateOfFirstRegistration     string
 	EngineCapacity              string
-	EngineIdNumber              string
+	EngineIDNumber              string
 	EngineRatedSpeed            string
 	ExpiryDate                  string
 	HomologationMark            string
@@ -45,7 +45,7 @@ type VehicleDocument struct {
 	UsersPersonalNo             string
 	UsersSurnameOrBusinessName  string
 	VehicleCategory             string
-	VehicleIdNumber             string
+	VehicleIDNumber             string
 	VehicleLoad                 string
 	VehicleMake                 string
 	VehicleMass                 string
@@ -53,6 +53,7 @@ type VehicleDocument struct {
 	YearOfProduction            string
 }
 
+// BuildPdf creates a PDF representation of the VehicleDocument.
 func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -97,9 +98,8 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 	dashFormat := func(str string) string {
 		if len(str) == 0 {
 			return "-"
-		} else {
-			return str
 		}
+		return str
 	}
 
 	cell := func(s string) {
@@ -129,7 +129,6 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 	}
 
 	putParagraph := func(data string) {
-
 		texts := strings.Split(data, ",")
 		if len(texts) == 2 {
 			cell(texts[0] + ",")
@@ -247,12 +246,12 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 	putData("Broj osovina", doc.NumberOfAxles)
 	newLine()
 
-	putData("Broj šasije", doc.VehicleIdNumber)
+	putData("Broj šasije", doc.VehicleIDNumber)
 	tab()
 	putData("Zapremina motora", doc.EngineCapacity)
 	newLine()
 
-	putData("Broj motora", doc.EngineIdNumber)
+	putData("Broj motora", doc.EngineIDNumber)
 	tab()
 	putData("Masa", doc.VehicleMass)
 	newLine()
@@ -292,10 +291,14 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 	return pdf.GetBytesPdf(), fileName, nil
 }
 
+// BuildJson creates a JSON representation of the VehicleDocument.
+// BuildJson creates a JSON representation of the VehicleDocument.
 func (doc *VehicleDocument) BuildJson() ([]byte, error) {
 	return json.Marshal(doc)
 }
 
+// BuildExcel creates an Excel representation of the VehicleDocument.
+// BuildExcel creates an Excel representation of the VehicleDocument.
 func (doc *VehicleDocument) BuildExcel() ([]byte, string, error) {
 	xlsx, err := CreateExcel(*doc)
 	fileName := doc.formatFilename() + ".xlsx"

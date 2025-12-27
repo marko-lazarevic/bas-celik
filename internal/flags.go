@@ -1,3 +1,4 @@
+// Package internal contains internal implementation details for the bas-celik application.
 package internal
 
 import (
@@ -11,6 +12,7 @@ import (
 
 var version string
 
+// ProcessFlags processes command-line flags and returns launch configuration.
 func ProcessFlags() (LaunchConfig, bool) {
 	launchCfg := LaunchConfig{}
 
@@ -46,7 +48,7 @@ func ProcessFlags() (LaunchConfig, bool) {
 		return launchCfg, true
 	}
 
-	launchCfg.JsonPath = *jsonPath
+	launchCfg.JSONPath = *jsonPath
 	launchCfg.PdfPath = *pdfPath
 	launchCfg.ExcelPath = *excelPath
 	launchCfg.Verbose = *verboseFlag
@@ -130,6 +132,7 @@ func printVersion() {
 	fmt.Println("https://github.com/ubavic/bas-celik")
 }
 
+// SetVersion sets the application version string.
 func SetVersion(v string) {
 	version = v
 }

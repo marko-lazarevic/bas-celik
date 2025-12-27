@@ -31,13 +31,13 @@ func showSetupBox() func() {
 		colorTheme := preferences.IntWithFallback(themePreferenceKey, 0)
 		themeSelect := widget.NewSelect(
 			[]string{t("preference.theme.osDetermines"), t("preference.theme.alwaysLight"), t("preference.theme.alwaysDark")},
-			func(s string) {})
+			func(_ string) {})
 		themeSelect.SetSelectedIndex(colorTheme)
 
 		language := preferences.IntWithFallback(languagePreferenceKey, 0)
 		languageSelect := widget.NewSelect(
 			[]string{"Srpski", "Српски", "English"},
-			func(s string) {},
+			func(_ string) {},
 		)
 		languageSelect.SetSelectedIndex(language)
 

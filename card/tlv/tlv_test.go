@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ubavic/bas-celik/v2/card/cardErrors"
+	"github.com/ubavic/bas-celik/v2/card/carderrors"
 	"github.com/ubavic/bas-celik/v2/card/tlv"
 )
 
@@ -18,7 +18,7 @@ func Test_parseTLV(t *testing.T) {
 	}{
 		{
 			data:          []byte{},
-			expectedError: cardErrors.ErrInvalidLength,
+			expectedError: carderrors.ErrInvalidLength,
 		},
 		{
 			data: []byte{0x01, 0x00, 0x05, 0x00, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x09, 0x00, 0x05, 0x00, 0x57, 0x6F, 0x72, 0x6C, 0x64},
@@ -30,15 +30,15 @@ func Test_parseTLV(t *testing.T) {
 		},
 		{
 			data:          []byte{0x01, 0x00, 0x05, 0x00, 0x48, 0x65},
-			expectedError: cardErrors.ErrInvalidLength,
+			expectedError: carderrors.ErrInvalidLength,
 		},
 		{
 			data:          []byte{0x02, 0x00},
-			expectedError: cardErrors.ErrInvalidLength,
+			expectedError: carderrors.ErrInvalidLength,
 		},
 		{
 			data:          []byte{0x02, 0x00, 0x01, 0x00},
-			expectedError: cardErrors.ErrInvalidLength,
+			expectedError: carderrors.ErrInvalidLength,
 		},
 		{
 			data: []byte{0x02, 0x00, 0x01, 0x00, 0x01},

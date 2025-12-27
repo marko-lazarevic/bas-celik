@@ -23,14 +23,14 @@ func startCardReaderUI() {
 
 	poller, pollerErr := reader.NewPoller(state.toolbar, connectToCard)
 
-	rows := container.New(layout.NewVBoxLayout(), state.toolbar, spacer, state.startPage, state.documentUiMainContainer, state.cryptoUiContainer)
+	rows := container.New(layout.NewVBoxLayout(), state.toolbar, spacer, state.startPage, state.documentUIMainContainer, state.cryptoUIContainer)
 	columns := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), rows, layout.NewSpacer())
 
-	state.documentUi = columns
+	state.documentUI = columns
 
-	state.mainContainer.Add(state.documentUi)
+	state.mainContainer.Add(state.documentUI)
 
-	state.cryptoUiContainer.Hide()
+	state.cryptoUIContainer.Hide()
 
 	if pollerErr == nil {
 		poller.StartPoller()
@@ -49,7 +49,7 @@ func setUI(doc document.Document) {
 	buttonBarObjects := []fyne.CanvasObject{state.statusBar, layout.NewSpacer()}
 
 	switch doc := doc.(type) {
-	case *document.IdDocument:
+	case *document.IDDocument:
 		page = pageID(doc)
 	case *document.MedicalDocument:
 		updateButton := widget.NewButton(t("ui.update"), updateMedicalDocHandler(doc))
@@ -65,58 +65,52 @@ func setUI(doc document.Document) {
 
 	buttonBar := container.New(layout.NewHBoxLayout(), buttonBarObjects...)
 
-	state.documentUiMainContainer.RemoveAll()
-	state.documentUiMainContainer.Add(page)
-	state.documentUiMainContainer.Add(buttonBar)
+	state.documentUIMainContainer.RemoveAll()
+	state.documentUIMainContainer.Add(page)
+	state.documentUIMainContainer.Add(buttonBar)
 
 	state.startPage.Hide()
-	state.documentUiMainContainer.Show()
+	state.documentUIMainContainer.Show()
 
 	resizeWindow(false)
 }
 
-func setStartPage(statusId, explanationId string, err error) {
+func setStartPage(statusID, explanationID string, err error) {
 	state.mu.Lock()
 	defer state.mu.Unlock()
 
-	status := t(statusId)
-	explanation := t(explanationId)
+	status := t(statusID)
+	explanation := t(explanationID)
 
-	isError := false
-	if err != nil {
-		isError = true
-	}
+	isError := err != nil
 
 	if isError {
 		logger.Error(err)
 	} else {
-		logger.Info(translation.EnglishTranslation(statusId) + " " + translation.EnglishTranslation(explanationId))
+		logger.Info(translation.EnglishTranslation(statusID) + " " + translation.EnglishTranslation(explanationID))
 	}
 
 	state.startPage.SetStatus(status, explanation, isError)
 	state.startPage.Refresh()
 
-	state.documentUiMainContainer.RemoveAll()
+	state.documentUIMainContainer.RemoveAll()
 
-	state.documentUiMainContainer.Hide()
+	state.documentUIMainContainer.Hide()
 	state.startPage.Show()
 
 	resizeWindow(true)
 }
 
-func setStatus(statusId string, err error) {
-	isError := false
-	if err != nil {
-		isError = true
-	}
+func setStatus(statusID string, err error) {
+	isError := err != nil
 
 	if isError {
 		logger.Error(err)
 	} else {
-		logger.Info(translation.EnglishTranslation(statusId))
+		logger.Info(translation.EnglishTranslation(statusID))
 	}
 
-	status := t(statusId)
+	status := t(statusID)
 	state.statusBar.SetStatus(status, isError)
 	state.statusBar.Refresh()
 }
@@ -167,11 +161,11 @@ func setTimedStatus(label string) {
 
 func showDocumentUI() {
 	state.mainContainer.RemoveAll()
-	state.mainContainer.Add(state.documentUi)
+	state.mainContainer.Add(state.documentUI)
 }
 
 func resizeWindow(keepCurrentSize bool) {
-	minSize := state.documentUi.MinSize()
+	minSize := state.documentUI.MinSize()
 
 	if keepCurrentSize {
 		currentSize := state.mainContainer.Size()

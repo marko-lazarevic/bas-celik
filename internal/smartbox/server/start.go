@@ -1,3 +1,4 @@
+// Package server contains the implementation of the Smartbox server.
 package server
 
 import (
@@ -9,6 +10,7 @@ import (
 	"github.com/ubavic/bas-celik/v2/internal/logger"
 )
 
+// StartServer starts the Smartbox server on an available port and returns the address.
 func StartServer(modulePaths []ModulePath) (string, error) {
 	smartboxServer := SmartBoxServer{}
 	smartboxServer.sessions = make(map[string]SmartboxSession)
@@ -36,7 +38,7 @@ func StartServer(modulePaths []ModulePath) (string, error) {
 	}
 
 	go func() {
-		s.Serve(l)
+		_ = s.Serve(l)
 	}()
 
 	logger.Info(fmt.Sprintf("Smartbox server listening on ws://%v", l.Addr()))
@@ -48,7 +50,7 @@ func findAvailablePort(ports []uint) uint {
 	for _, port := range ports {
 		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 		if err == nil {
-			listener.Close()
+			_ = listener.Close()
 			return port
 		}
 	}

@@ -12,7 +12,7 @@ import (
 	doc "github.com/ubavic/bas-celik/v2/document"
 )
 
-// Represents a physical or virtual smart card.
+// Card represents a physical or virtual smart card.
 // Essentially it is just a wrapper for the scard.Card type,
 // but it also allows virtual cards which can be useful for testing.
 type Card interface {
@@ -22,8 +22,8 @@ type Card interface {
 	EndTransaction(scard.Disposition) error
 }
 
-// Represents a smart card with a document.
-// All types of documents that Bas Celik can read should satisfy this interface
+// CardDocument represents a smart card with a document.
+// All types of documents that Bas Celik can read should satisfy this interface.
 type CardDocument interface {
 	ReadFile([]byte) ([]byte, error)
 	InitCard() error
@@ -33,23 +33,29 @@ type CardDocument interface {
 	Atr() Atr
 }
 
-// Represents a different types of smart card documents.
-// Each value of `CardDocumentType` is represented with a struct
-// that satisfies `CardDocument` interface.
+// CardDocumentType represents different types of smart card documents.
+// Each value of CardDocumentType is represented with a struct
+// that satisfies CardDocument interface.
 type CardDocumentType uint8
 
 const (
+	// UnknownDocumentCardType represents an unknown or unsupported card type.
 	UnknownDocumentCardType = CardDocumentType(iota)
-	ApolloIdDocumentCardType
-	GemaltoIdDocumentCardType
+	// ApolloIDDocumentCardType represents Apollo ID cards.
+	ApolloIDDocumentCardType
+	// GemaltoIDDocumentCardType represents Gemalto ID cards.
+	GemaltoIDDocumentCardType
+	// MedicalDocumentCardType represents medical insurance cards.
 	MedicalDocumentCardType
+	// VehicleDocumentCardType represents vehicle registration cards.
 	VehicleDocumentCardType
 )
 
+// ErrUnknownCard is returned when the card type cannot be determined.
 var ErrUnknownCard = errors.New("unknown card")
 
-// Detects Card Document from card's ATR
-// Ambiguous cases are solved by reading specific card content
+// DetectCardDocument detects the card document type from card's ATR.
+// Ambiguous cases are solved by reading specific card content.
 func DetectCardDocument(sc Card) (CardDocument, error) {
 	smartCardStatus, err := sc.Status()
 	if err != nil {
@@ -62,10 +68,10 @@ func DetectCardDocument(sc Card) (CardDocument, error) {
 
 	for _, cardType := range possibleCardTypes {
 		switch cardType {
-		case ApolloIdDocumentCardType:
+		case ApolloIDDocumentCardType:
 			card := &Apollo{atr: atr, smartCard: sc}
 			return card, nil
-		case GemaltoIdDocumentCardType:
+		case GemaltoIDDocumentCardType:
 			card := Gemalto{atr: atr, smartCard: sc}
 			if card.Test() {
 				return &card, nil

@@ -19,17 +19,19 @@ type Apollo struct {
 	photoFile     []byte
 }
 
+// APOLLO_ATR is the Answer To Reset sequence for Apollo ID cards.
 var APOLLO_ATR = Atr([]byte{
 	0x3B, 0xB9, 0x18, 0x00, 0x81, 0x31, 0xFE, 0x9E, 0x80,
 	0x73, 0xFF, 0x61, 0x40, 0x83, 0x00, 0x00, 0x00, 0xDF,
 })
 
+// InitCard initializes the Apollo card.
 func (card *Apollo) InitCard() error {
 	return nil
 }
 
+// ReadCard reads all files from the Apollo card.
 func (card *Apollo) ReadCard() error {
-
 	var err error
 
 	card.documentFile, err = card.ReadFile(ID_DOCUMENT_FILE_LOC)
@@ -57,25 +59,26 @@ func (card *Apollo) ReadCard() error {
 	return nil
 }
 
+// GetDocument parses and returns the ID document from the Apollo card.
 func (card *Apollo) GetDocument() (document.Document, error) {
-	doc := document.IdDocument{}
+	doc := document.IDDocument{}
 
-	err := parseIdDocumentFile(card.documentFile, &doc)
+	err := parseIDDocumentFile(card.documentFile, &doc)
 	if err != nil {
 		return nil, fmt.Errorf("parsing document file: %w", err)
 	}
 
-	err = parseIdPersonalFile(card.personalFile, &doc)
+	err = parseIDPersonalFile(card.personalFile, &doc)
 	if err != nil {
 		return nil, fmt.Errorf("parsing personal file: %w", err)
 	}
 
-	err = parseIdResidenceFile(card.residenceFile, &doc)
+	err = parseIDResidenceFile(card.residenceFile, &doc)
 	if err != nil {
 		return nil, fmt.Errorf("parsing residence file: %w", err)
 	}
 
-	err = parseAndAssignIdPhotoFile(card.photoFile, &doc)
+	err = parseAndAssignIDPhotoFile(card.photoFile, &doc)
 	if err != nil {
 		return nil, fmt.Errorf("parsing photo file: %w", err)
 	}
@@ -83,10 +86,12 @@ func (card *Apollo) GetDocument() (document.Document, error) {
 	return &doc, nil
 }
 
+// Atr returns the Answer To Reset of the Apollo card.
 func (card *Apollo) Atr() Atr {
 	return card.atr
 }
 
+// ReadFile reads a file from the Apollo card.
 func (card *Apollo) ReadFile(name []byte) ([]byte, error) {
 	output := make([]byte, 0)
 
@@ -125,6 +130,7 @@ func (card *Apollo) ReadFile(name []byte) ([]byte, error) {
 	return output, nil
 }
 
+// Test verifies whether the Apollo card can be read.
 func (card *Apollo) Test() bool {
 	return true
 }

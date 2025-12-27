@@ -5,26 +5,26 @@ import (
 	"fmt"
 
 	"github.com/ubavic/bas-celik/v2/card/ber"
-	"github.com/ubavic/bas-celik/v2/card/cardErrors"
+	"github.com/ubavic/bas-celik/v2/card/carderrors"
 	"github.com/ubavic/bas-celik/v2/document"
 	"github.com/ubavic/bas-celik/v2/localization"
 )
 
-// Represents a smart card that contains a Serbian vehicle document.
+// VehicleCard represents a smart card that contains a Serbian vehicle document.
 type VehicleCard struct {
 	atr       Atr
 	smartCard Card
 	files     [4][]byte
 }
 
-// Possibly deprecated.
+// VEHICLE_ATR_0 is possibly deprecated.
 var VEHICLE_ATR_0 = Atr([]byte{
 	0x3B, 0xDB, 0x96, 0x00, 0x80, 0xB1, 0xFE, 0x45,
 	0x1F, 0x83, 0x00, 0x31, 0xC0, 0x64, 0x1A, 0x18,
 	0x01, 0x00, 0x0F, 0x90, 0x00, 0x52,
 })
 
-// Same as GEMALTO_ATR_1
+// VEHICLE_ATR_1 is the same as GEMALTO_ATR_1.
 var VEHICLE_ATR_1 = Atr([]byte{
 	0x3B, 0xFF, 0x94, 0x00, 0x00, 0x81, 0x31, 0x80,
 	0x43, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x02,
@@ -32,25 +32,28 @@ var VEHICLE_ATR_1 = Atr([]byte{
 	0x79,
 })
 
+// VEHICLE_ATR_2 is an Answer To Reset sequence for vehicle cards.
 var VEHICLE_ATR_2 = Atr([]byte{
 	0x3B, 0x9D, 0x13, 0x81, 0x31, 0x60, 0x37, 0x80,
 	0x31, 0xC0, 0x69, 0x4D, 0x54, 0x43, 0x4F, 0x53,
 	0x73, 0x02, 0x02, 0x04, 0x40,
 })
 
+// VEHICLE_ATR_3 is an Answer To Reset sequence for vehicle cards.
 var VEHICLE_ATR_3 = Atr([]byte{
 	0x3B, 0x9D, 0x13, 0x81, 0x31, 0x60, 0x37, 0x80,
 	0x31, 0xC0, 0x69, 0x4D, 0x54, 0x43, 0x4F, 0x53,
 	0x73, 0x02, 0x05, 0x04, 0x47,
 })
 
+// VEHICLE_ATR_4 is an Answer To Reset sequence for vehicle cards.
 var VEHICLE_ATR_4 = Atr([]byte{
 	0x3B, 0x9D, 0x18, 0x81, 0x31, 0xFC, 0x35, 0x80,
 	0x31, 0xC0, 0x69, 0x4D, 0x54, 0x43, 0x4F, 0x53,
 	0x73, 0x02, 0x05, 0x02, 0xD4,
 })
 
-// Initializes vehicle card by trying three different sets of commands.
+// InitCard initializes the vehicle card by trying three different sets of commands.
 // The procedure is reverse-engineered from the official binary.
 func (card VehicleCard) InitCard() error {
 	tryToSelect := func(cmd1, cmd2, cmd3 []byte) error {
@@ -74,9 +77,8 @@ func (card VehicleCard) InitCard() error {
 			}
 
 			return nil
-		} else {
-			return fmt.Errorf("selecting file: %w", err)
 		}
+		return fmt.Errorf("selecting file: %w", err)
 	}
 
 	err := tryToSelect(
@@ -106,6 +108,7 @@ func (card VehicleCard) InitCard() error {
 	return fmt.Errorf("card not responsive: %w", err)
 }
 
+// ReadCard reads all necessary files from the vehicle card.
 func (card *VehicleCard) ReadCard() error {
 	var err error
 
@@ -119,6 +122,7 @@ func (card *VehicleCard) ReadCard() error {
 	return nil
 }
 
+// GetDocument extracts the vehicle document data from the read files.
 func (card *VehicleCard) GetDocument() (document.Document, error) {
 	doc := document.VehicleDocument{}
 	data := ber.BER{}
@@ -138,7 +142,7 @@ func (card *VehicleCard) GetDocument() (document.Document, error) {
 	data.AssignFrom(&doc.RegistrationNumberOfVehicle, 0x71, 0x81)
 	data.AssignFrom(&doc.DateOfFirstRegistration, 0x71, 0x82)
 	localization.FormatDateYMD(&doc.DateOfFirstRegistration)
-	data.AssignFrom(&doc.VehicleIdNumber, 0x71, 0x8A)
+	data.AssignFrom(&doc.VehicleIDNumber, 0x71, 0x8A)
 	data.AssignFrom(&doc.VehicleMass, 0x71, 0x8C)
 	data.AssignFrom(&doc.ExpiryDate, 0x71, 0x8D)
 	localization.FormatDateYMD(&doc.ExpiryDate)
@@ -163,7 +167,7 @@ func (card *VehicleCard) GetDocument() (document.Document, error) {
 	data.AssignFrom(&doc.NumberOfAxles, 0x72, 0x99)
 	data.AssignFrom(&doc.VehicleLoad, 0x72, 0xC4)
 	data.AssignFrom(&doc.YearOfProduction, 0x72, 0xC5)
-	data.AssignFrom(&doc.EngineIdNumber, 0x72, 0xA5, 0x9E)
+	data.AssignFrom(&doc.EngineIDNumber, 0x72, 0xA5, 0x9E)
 	data.AssignFrom(&doc.SerialNumber, 0x72, 0xC9)
 	data.AssignFrom(&doc.ColourOfVehicle, 0x72, 0x9F24)
 	data.AssignFrom(&doc.UsersPersonalNo, 0x72, 0xC3)
@@ -185,10 +189,12 @@ func (card *VehicleCard) GetDocument() (document.Document, error) {
 	return &doc, nil
 }
 
+// Atr returns the ATR of the vehicle card.
 func (card *VehicleCard) Atr() Atr {
 	return card.atr
 }
 
+// ReadFile reads a file from the vehicle card.
 func (card *VehicleCard) ReadFile(name []byte) ([]byte, error) {
 	output := make([]byte, 0)
 
@@ -229,6 +235,7 @@ func (card *VehicleCard) ReadFile(name []byte) ([]byte, error) {
 	return output, nil
 }
 
+// Test tests if the card is responsive.
 func (card VehicleCard) Test() bool {
 	err := card.InitCard()
 	return err == nil
@@ -236,13 +243,13 @@ func (card VehicleCard) Test() bool {
 
 func parseVehicleCardFileSize(data []byte) (uint, uint, error) {
 	if len(data) < 1 {
-		return 0, 0, cardErrors.ErrInvalidLength
+		return 0, 0, carderrors.ErrInvalidLength
 	}
 
 	offset := uint(data[1]) + 2
 
 	if offset >= uint(len(data)) {
-		return 0, 0, cardErrors.ErrInvalidLength
+		return 0, 0, carderrors.ErrInvalidLength
 	}
 
 	_, _, offsetDelta1, err := ber.ParseTag(data[offset:])
@@ -251,7 +258,7 @@ func parseVehicleCardFileSize(data []byte) (uint, uint, error) {
 	}
 
 	if offset+uint(offsetDelta1) >= uint(len(data)) {
-		return 0, 0, cardErrors.ErrInvalidLength
+		return 0, 0, carderrors.ErrInvalidLength
 	}
 
 	dataLength, offsetDelta2, err := ber.ParseLength(data[offset+uint(offsetDelta1):])

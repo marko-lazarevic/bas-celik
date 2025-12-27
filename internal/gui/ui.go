@@ -1,3 +1,4 @@
+// Package gui implements the graphical user interface for the Baš Čelik application.
 package gui
 
 import (
@@ -15,17 +16,18 @@ import (
 	"github.com/ubavic/bas-celik/v2/internal/gui/widgets"
 )
 
+// State holds the state of the GUI application.
 type State struct {
 	version                 string
 	mu                      sync.Mutex
 	app                     fyne.App
 	window                  fyne.Window
 	mainContainer           *fyne.Container
-	documentUi              *fyne.Container
-	cryptoUiContainer       *fyne.Container
-	cryptoUi                *fyne.Container
+	documentUI              *fyne.Container
+	cryptoUIContainer       *fyne.Container
+	cryptoUI                *fyne.Container
 	startPage               *widgets.StartPage
-	documentUiMainContainer *fyne.Container
+	documentUIMainContainer *fyne.Container
 	toolbar                 *widgets.Toolbar
 	statusBar               *widgets.StatusBar
 	cardDocument            card.CardDocument
@@ -36,6 +38,7 @@ type State struct {
 
 var state State
 
+// StartGui initializes and starts the GUI application.
 func StartGui(version string) {
 	app := app.New()
 	win := app.NewWindow("Baš Čelik")
@@ -61,8 +64,8 @@ func StartGui(version string) {
 		window:                  win,
 		version:                 version,
 		mainContainer:           mainContainer,
-		cryptoUiContainer:       cryptoContainer,
-		documentUiMainContainer: mainPage,
+		cryptoUIContainer:       cryptoContainer,
+		documentUIMainContainer: mainPage,
 		startPage:               startPage,
 		statusBar:               statusBar,
 	}

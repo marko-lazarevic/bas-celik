@@ -17,22 +17,22 @@ import (
 	"github.com/ubavic/bas-celik/v2/localization"
 )
 
-const rfzoServiceUrl = "https://www.rfzo.rs/proveraUplateDoprinosa2.php"
+const rfzoServiceURL = "https://www.rfzo.rs/proveraUplateDoprinosa2.php"
 
-// Card number doesn't have exactly 11 digits.
+// ErrInvalidCardNo is returned when the card number doesn't have exactly 11 digits.
 var ErrInvalidCardNo = errors.New("invalid card number length")
 
-// Insurance number doesn't have exactly 11 digits.
+// ErrInvalidInsuranceNo is returned when the insurance number doesn't have exactly 11 digits.
 var ErrInvalidInsuranceNo = errors.New("invalid insurance number length")
 
-// Date `ValidUntil` could not be extracted from RFZO response.
+// ErrNoSubmatchFound is returned when the date ValidUntil could not be extracted from RFZO response.
 var ErrNoSubmatchFound = errors.New("no submatch found")
 
-// Represents a document stored on a Serbian public medical insurance card.
+// MedicalDocument represents a document stored on a Serbian public medical insurance card.
 type MedicalDocument struct {
 	InsurerName            string
 	InsurerID              string
-	CardId                 string
+	CardID                 string
 	DateOfIssue            string
 	DateOfExpiry           string
 	ChipSerialNumber       string
@@ -59,7 +59,7 @@ type MedicalDocument struct {
 	CarrierFamilyNameLatin string
 	CarrierGivenName       string
 	CarrierFamilyName      string
-	CarrierIdNumber        string
+	CarrierIDNumber        string
 	CarrierInsurantNumber  string
 	CarrierFamilyMember    bool
 	CarrierRelationship    string
@@ -69,14 +69,16 @@ type MedicalDocument struct {
 	TaxpayerName           string
 	TaxpayerResidence      string
 	TaxpayerNumber         string
-	TaxpayerIdNumber       string
+	TaxpayerIDNumber       string
 	TaxpayerActivityCode   string
 }
 
+// GetFullName returns the full name of the medical document holder.
 func (doc *MedicalDocument) GetFullName() string {
 	return localization.JoinWithComma(doc.GivenNameLatin, doc.ParentNameLatin, doc.FamilyNameLatin)
 }
 
+// GetFullStreetAddress returns the full street address.
 func (doc *MedicalDocument) GetFullStreetAddress() string {
 	var address strings.Builder
 
@@ -94,10 +96,12 @@ func (doc *MedicalDocument) GetFullStreetAddress() string {
 	return address.String()
 }
 
+// GetFullPlaceAddress returns the full place address.
 func (doc *MedicalDocument) GetFullPlaceAddress() string {
 	return localization.JoinWithComma(doc.Place, doc.Municipality, doc.Country)
 }
 
+// BuildPdf creates a PDF representation of the MedicalDocument.
 func (doc *MedicalDocument) BuildPdf() (data []byte, fileName string, retErr error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -221,7 +225,7 @@ func (doc *MedicalDocument) BuildPdf() (data []byte, fileName string, retErr err
 
 	putData("ЛБО:", doc.CarrierInsurantNumber)
 
-	putData("ЈМБГ:", doc.CarrierIdNumber)
+	putData("ЈМБГ:", doc.CarrierIDNumber)
 
 	putData("Члан породице:", localization.FormatYesNo(doc.CarrierFamilyMember, localization.SrCyrillic))
 
@@ -243,7 +247,7 @@ func (doc *MedicalDocument) BuildPdf() (data []byte, fileName string, retErr err
 
 	putData("Регистарски број:", doc.TaxpayerNumber)
 
-	putData("ПИБ/ЈМБГ:", doc.TaxpayerIdNumber)
+	putData("ПИБ/ЈМБГ:", doc.TaxpayerIDNumber)
 
 	putData("Делатност:", doc.TaxpayerActivityCode)
 
@@ -259,10 +263,12 @@ func (doc *MedicalDocument) BuildPdf() (data []byte, fileName string, retErr err
 	return pdf.GetBytesPdf(), fileName, nil
 }
 
+// BuildJson creates a JSON representation of the MedicalDocument.
 func (doc *MedicalDocument) BuildJson() ([]byte, error) {
 	return json.Marshal(doc)
 }
 
+// BuildExcel creates an Excel representation of the MedicalDocument.
 func (doc *MedicalDocument) BuildExcel() ([]byte, string, error) {
 	xlsx, err := CreateExcel(*doc)
 	name := doc.formatFilename() + ".xlsx"
@@ -273,8 +279,9 @@ func (doc *MedicalDocument) formatFilename() string {
 	return strings.ToLower(doc.GivenNameLatin + "_" + doc.FamilyNameLatin)
 }
 
+// UpdateValidUntilDateFromRfzo fetches and updates the ValidUntil date from the RFZO web service.
 func (doc *MedicalDocument) UpdateValidUntilDateFromRfzo() error {
-	if len([]rune(doc.CardId)) != 11 {
+	if len([]rune(doc.CardID)) != 11 {
 		return ErrInvalidCardNo
 	}
 
@@ -282,7 +289,7 @@ func (doc *MedicalDocument) UpdateValidUntilDateFromRfzo() error {
 		return ErrInvalidInsuranceNo
 	}
 
-	resp, err := http.PostForm(rfzoServiceUrl, url.Values{"zk": {doc.CardId}, "lbo": {doc.InsurantNumber}})
+	resp, err := http.PostForm(rfzoServiceURL, url.Values{"zk": {doc.CardID}, "lbo": {doc.InsurantNumber}})
 	if err != nil {
 		return fmt.Errorf("posting: %w", err)
 	}
@@ -304,6 +311,7 @@ func (doc *MedicalDocument) UpdateValidUntilDateFromRfzo() error {
 	return nil
 }
 
+// ParseValidUntilDateFromRfzoResponse extracts the ValidUntil date from RFZO service response.
 func ParseValidUntilDateFromRfzoResponse(response string) (string, error) {
 	regex, err := regexp.Compile(`оверена до: <strong>(\d+\.\d+\.\d+\.)</strong>`)
 	if err != nil {

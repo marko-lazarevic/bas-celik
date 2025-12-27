@@ -5,8 +5,7 @@ import (
 	"unicode"
 )
 
-// Checks if the PIN consists only of digits,
-// and it's length is between 4 and 8.
+// ValidatePin checks if the PIN consists only of digits and its length is between 4 and 8.
 func ValidatePin(pin string) bool {
 	pinLength := len(pin)
 	if pinLength < 4 || pinLength > 8 {
@@ -22,7 +21,7 @@ func ValidatePin(pin string) bool {
 	return true
 }
 
-// Creates a 8 byte slice containing the PIN at the beginning.
+// PadPin creates an 8 byte slice containing the PIN at the beginning.
 func PadPin(pin string) []byte {
 	data := make([]byte, 8)
 
@@ -35,6 +34,7 @@ func PadPin(pin string) []byte {
 	return data
 }
 
+// PinTriesLeft returns the number of PIN attempts remaining based on the response.
 func PinTriesLeft(rsp []byte) int {
 	if slices.Equal(rsp, []byte{0x63, 0xC0}) || slices.Equal(rsp, []byte{0x69, 0x83}) {
 		return 0

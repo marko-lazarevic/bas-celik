@@ -1,3 +1,4 @@
+// Package widgets contains custom GUI widgets for the application.
 package widgets
 
 import (
@@ -9,6 +10,7 @@ import (
 	"github.com/ubavic/bas-celik/v2/internal/gui/translation"
 )
 
+// Toolbar represents the application toolbar with buttons and reader selection.
 type Toolbar struct {
 	widget.BaseWidget
 	readers           []string
@@ -19,6 +21,7 @@ type Toolbar struct {
 	showReaders       bool
 }
 
+// ToolbarRenderer implements the fyne.WidgetRenderer interface for the Toolbar.
 type ToolbarRenderer struct {
 	toolbar           *Toolbar
 	aboutButton       *widget.Button
@@ -28,6 +31,7 @@ type ToolbarRenderer struct {
 	readersSelect     *widget.Select
 }
 
+// NewToolbar creates a new Toolbar instance.
 func NewToolbar(onOpenAbout, onOpenPreferences func(), showReaders bool) *Toolbar {
 	toolbar := &Toolbar{
 		readers:           nil,
@@ -40,10 +44,12 @@ func NewToolbar(onOpenAbout, onOpenPreferences func(), showReaders bool) *Toolba
 	return toolbar
 }
 
+// HookReaderChange sets the callback function for reader change events.
 func (t *Toolbar) HookReaderChange(hook func(string)) {
 	t.onReaderChange = hook
 }
 
+// CreateRenderer creates a new renderer for the Toolbar.
 func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 	label := widget.NewLabel(translation.Translate("ui.reader"))
 
@@ -78,56 +84,62 @@ func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-func (r *ToolbarRenderer) Refresh() {
-	if r.toolbar.showReaders {
-		r.readersSelect.SetOptions(r.toolbar.readers)
-		r.readersSelect.Selected = r.toolbar.selectedReader
+// Refresh updates the visual representation of the toolbar.
+func (t *ToolbarRenderer) Refresh() {
+	if t.toolbar.showReaders {
+		t.readersSelect.SetOptions(t.toolbar.readers)
+		t.readersSelect.Selected = t.toolbar.selectedReader
 
-		if len(r.toolbar.readers) <= 1 {
-			r.readersSelect.Disable()
+		if len(t.toolbar.readers) <= 1 {
+			t.readersSelect.Disable()
 		} else {
-			r.readersSelect.Enable()
+			t.readersSelect.Enable()
 		}
 
-		r.readersSelect.Refresh()
+		t.readersSelect.Refresh()
 	}
 
-	r.aboutButton.Refresh()
+	t.aboutButton.Refresh()
 }
 
-func (r *ToolbarRenderer) Layout(s fyne.Size) {
+// Layout positions the toolbar elements within the given size.
+func (t *ToolbarRenderer) Layout(s fyne.Size) {
 	availableWidth := s.Width
-	availableWidth -= r.aboutButton.Size().Width
-	availableWidth -= r.preferencesButton.MinSize().Width
-	if r.toolbar.showReaders {
-		availableWidth -= r.readersLabel.MinSize().Width
+	availableWidth -= t.aboutButton.Size().Width
+	availableWidth -= t.preferencesButton.MinSize().Width
+	if t.toolbar.showReaders {
+		availableWidth -= t.readersLabel.MinSize().Width
 	}
 	availableWidth -= 2 * theme.InnerPadding()
-	r.container.Resize(s)
-	r.readersSelect.Resize(fyne.Size{Width: availableWidth, Height: s.Height})
+	t.container.Resize(s)
+	t.readersSelect.Resize(fyne.Size{Width: availableWidth, Height: s.Height})
 }
 
-func (r *ToolbarRenderer) MinSize() fyne.Size {
-	return r.container.MinSize()
+// MinSize returns the minimum size required for the toolbar.
+func (t *ToolbarRenderer) MinSize() fyne.Size {
+	return t.container.MinSize()
 }
 
-func (r *ToolbarRenderer) Objects() []fyne.CanvasObject {
-	objects := []fyne.CanvasObject{r.aboutButton, r.preferencesButton, r.container}
+// Objects returns the visual objects that make up the toolbar.
+func (t *ToolbarRenderer) Objects() []fyne.CanvasObject {
+	objects := []fyne.CanvasObject{t.aboutButton, t.preferencesButton, t.container}
 
-	if r.toolbar.showReaders {
-		objects = append(objects, r.readersSelect)
+	if t.toolbar.showReaders {
+		objects = append(objects, t.readersSelect)
 	}
 
 	return objects
 }
 
-func (r *ToolbarRenderer) Destroy() {}
+// Destroy is a no-op for ToolbarRenderer.
+func (t *ToolbarRenderer) Destroy() {}
 
-func (r *Toolbar) SetReaders(readers []string, selectedReader string) {
-	r.readers = make([]string, len(readers))
-	copy(r.readers, readers)
+// SetReaders updates the list of available readers and sets the selected reader.
+func (t *Toolbar) SetReaders(readers []string, selectedReader string) {
+	t.readers = make([]string, len(readers))
+	copy(t.readers, readers)
 
-	r.selectedReader = selectedReader
+	t.selectedReader = selectedReader
 
-	r.Refresh()
+	t.Refresh()
 }

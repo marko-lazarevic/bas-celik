@@ -9,8 +9,9 @@ import (
 	"github.com/ubavic/bas-celik/v2/internal/logger"
 )
 
+// Run runs the application with GUI interface.
 func Run(cfg LaunchConfig) error {
-	if len(cfg.PdfPath) == 0 && len(cfg.JsonPath) == 0 && len(cfg.ExcelPath) == 0 {
+	if len(cfg.PdfPath) == 0 && len(cfg.JSONPath) == 0 && len(cfg.ExcelPath) == 0 {
 		err := translation.SetTranslations(cfg.EmbedDirectory)
 		if err != nil {
 			return err

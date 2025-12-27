@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// StartPage represents the initial page displayed when the application starts.
 type StartPage struct {
 	widget.BaseWidget
 	status      string
@@ -16,6 +17,7 @@ type StartPage struct {
 	err         bool
 }
 
+// StartPageRenderer implements the fyne.WidgetRenderer interface for the StartPage.
 type StartPageRenderer struct {
 	page            *StartPage
 	statusText      *canvas.Text
@@ -23,6 +25,7 @@ type StartPageRenderer struct {
 	container       *fyne.Container
 }
 
+// NewStartPage creates a new StartPage instance.
 func NewStartPage() *StartPage {
 	statusBar := &StartPage{
 		status:      "",
@@ -33,12 +36,14 @@ func NewStartPage() *StartPage {
 	return statusBar
 }
 
+// SetStatus updates the start page with a new status message and explanation.
 func (sb *StartPage) SetStatus(status, explanation string, err bool) {
 	sb.status = status
 	sb.explanation = explanation
 	sb.err = err
 }
 
+// CreateRenderer creates a new renderer for the StartPage.
 func (sb *StartPage) CreateRenderer() fyne.WidgetRenderer {
 	statusText := canvas.NewText(sb.status, theme.Color(theme.ColorNameForeground))
 	statusText.TextSize = 16
@@ -59,6 +64,7 @@ func (sb *StartPage) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
+// Refresh updates the visual representation of the start page.
 func (r *StartPageRenderer) Refresh() {
 	r.statusText.Text = r.page.status
 	r.explanationText.Text = r.page.explanation
@@ -73,16 +79,20 @@ func (r *StartPageRenderer) Refresh() {
 	r.explanationText.Refresh()
 }
 
+// Layout positions the start page elements within the given size.
 func (r *StartPageRenderer) Layout(s fyne.Size) {
 	r.container.Resize(s)
 }
 
+// MinSize returns the minimum size required for the start page.
 func (r *StartPageRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(500, 300)
 }
 
+// Objects returns the visual objects that make up the start page.
 func (r *StartPageRenderer) Objects() []fyne.CanvasObject {
 	return []fyne.CanvasObject{r.container}
 }
 
+// Destroy is a no-op for StartPageRenderer.
 func (r *StartPageRenderer) Destroy() {}

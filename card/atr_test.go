@@ -23,19 +23,19 @@ func Test_DetectCardDocumentByAtr(t *testing.T) {
 		},
 		{
 			atr:            card.APOLLO_ATR,
-			expectedResult: []card.CardDocumentType{card.ApolloIdDocumentCardType},
+			expectedResult: []card.CardDocumentType{card.ApolloIDDocumentCardType},
 		},
 		{
 			atr:            card.GEMALTO_ATR_1,
-			expectedResult: []card.CardDocumentType{card.GemaltoIdDocumentCardType, card.VehicleDocumentCardType},
+			expectedResult: []card.CardDocumentType{card.GemaltoIDDocumentCardType, card.VehicleDocumentCardType},
 		},
 		{
 			atr:            card.GEMALTO_ATR_2,
-			expectedResult: []card.CardDocumentType{card.GemaltoIdDocumentCardType, card.MedicalDocumentCardType, card.VehicleDocumentCardType},
+			expectedResult: []card.CardDocumentType{card.GemaltoIDDocumentCardType, card.MedicalDocumentCardType, card.VehicleDocumentCardType},
 		},
 		{
 			atr:            card.GEMALTO_ATR_4,
-			expectedResult: []card.CardDocumentType{card.GemaltoIdDocumentCardType, card.VehicleDocumentCardType},
+			expectedResult: []card.CardDocumentType{card.GemaltoIDDocumentCardType, card.VehicleDocumentCardType},
 		},
 		{
 			atr:            card.MEDICAL_ATR_1,
@@ -57,6 +57,5 @@ func Test_DetectCardDocumentByAtr(t *testing.T) {
 				t.Errorf("Expected response to be %v, but it is %v", testCase.expectedResult, result)
 			}
 		})
-
 	}
 }

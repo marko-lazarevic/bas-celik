@@ -1,3 +1,4 @@
+// Package icon provides icon loading and management for the GUI.
 package icon
 
 import (
@@ -8,9 +9,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+// CertificateThemedResource is the themed certificate icon resource.
 var CertificateThemedResource *theme.ThemedResource
+
+// PinThemedResource is the themed PIN icon resource.
 var PinThemedResource *theme.ThemedResource
 
+// LoadIcons loads icon resources from the embedded filesystem.
 func LoadIcons(embedFS embed.FS) error {
 	certificateSvg, err := embedFS.ReadFile("embed/icons/certificate.svg")
 	if err != nil {

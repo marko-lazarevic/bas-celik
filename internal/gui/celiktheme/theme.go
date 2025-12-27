@@ -1,3 +1,4 @@
+// Package celiktheme provides a custom Fyne theme with light and dark modes.
 package celiktheme
 
 import (
@@ -7,11 +8,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+// Theme implements a custom Fyne theme with light and dark modes.
 type Theme struct {
 	systemDecides bool
 	dark          bool
 }
 
+// NewTheme creates a new Theme instance based on the user's selection.
 func NewTheme(themeSelection int) Theme {
 	theme := Theme{}
 
@@ -24,32 +27,35 @@ func NewTheme(themeSelection int) Theme {
 	return theme
 }
 
+// Color returns the color for the given color name and variant.
 func (t Theme) Color(colorName fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	if t.systemDecides {
 		if v == theme.VariantLight || v == 2 {
 			return lightTheme(colorName)
-		} else {
-			return darkTheme(colorName)
 		}
+		return darkTheme(colorName)
 	} else if t.dark {
 		return darkTheme(colorName)
-	} else {
-		return lightTheme(colorName)
 	}
+	return lightTheme(colorName)
 }
 
+// Font returns the font resource for the given text style.
 func (Theme) Font(s fyne.TextStyle) fyne.Resource {
 	return theme.DefaultTheme().Font(s)
 }
 
+// Icon returns the icon resource for the given icon name.
 func (Theme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return theme.DefaultTheme().Icon(n)
 }
 
+// Size returns the size for the given size name.
 func (Theme) Size(s fyne.ThemeSizeName) float32 {
 	return theme.DefaultTheme().Size(s)
 }
 
+// CornerRadius returns the corner radius for UI elements.
 func (Theme) CornerRadius() float32 {
 	return 3
 }

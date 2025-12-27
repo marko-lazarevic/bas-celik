@@ -1,3 +1,4 @@
+// Package reader provides card reader polling functionality.
 package reader
 
 import (
@@ -13,6 +14,7 @@ import (
 var created = false
 var createdPoller *ReaderPoller
 
+// ReaderPoller manages card reader polling and state changes.
 type ReaderPoller struct {
 	readerListerContext *scard.Context
 	singleReaderContext *scard.Context
@@ -23,11 +25,13 @@ type ReaderPoller struct {
 	onCardEvent         func(string, *scard.Context)
 }
 
+// ReaderLister defines the interface for updating reader lists in the UI.
 type ReaderLister interface {
 	SetReaders([]string, string)
 	HookReaderChange(func(string))
 }
 
+// NewPoller creates a new ReaderPoller instance. Only one instance can be created.
 func NewPoller(readerLister ReaderLister, onCardEvent func(string, *scard.Context)) (*ReaderPoller, error) {
 	if created {
 		panic("you can create only single instance of ReaderPoller")
@@ -58,6 +62,7 @@ func NewPoller(readerLister ReaderLister, onCardEvent func(string, *scard.Contex
 	return createdPoller, nil
 }
 
+// StartPoller begins polling for reader and card state changes.
 func (rp *ReaderPoller) StartPoller() {
 	rp.onCardEvent("", rp.singleReaderContext)
 	go rp.pollReaders()
@@ -103,6 +108,7 @@ func (rp *ReaderPoller) pollReaders() {
 	}
 }
 
+// SetReader changes the currently selected reader and restarts polling for that reader.
 func (rp *ReaderPoller) SetReader(newReader string) {
 	if rp.currentReader == newReader {
 		return
@@ -129,7 +135,10 @@ func (rp *ReaderPoller) readerPoller(selectedReader string) {
 
 		states := []scard.ReaderState{state}
 
-		rp.singleReaderContext.GetStatusChange(states, 0)
+		err := rp.singleReaderContext.GetStatusChange(states, 0)
+		if err != nil {
+			return
+		}
 		for i := range states {
 			states[i].CurrentState = states[i].EventState
 		}
@@ -137,7 +146,7 @@ func (rp *ReaderPoller) readerPoller(selectedReader string) {
 		logger.Debug("Reader poller event 1: " + card.FormatState(states[0].CurrentState))
 
 		rp.readerPollerStarted.Store(true)
-		err := rp.singleReaderContext.GetStatusChange(states, -1)
+		err = rp.singleReaderContext.GetStatusChange(states, -1)
 		if err != nil {
 			return
 		}
@@ -148,6 +157,7 @@ func (rp *ReaderPoller) readerPoller(selectedReader string) {
 	}
 }
 
+// CancelReaderPoler cancels the current reader polling operation.
 func CancelReaderPoler() {
 	logger.Debug("Canceling reader poller...")
 	if createdPoller.readerPollerStarted.Load() {
@@ -156,6 +166,7 @@ func CancelReaderPoler() {
 	}
 }
 
+// RestartReaderPoler restarts the reader polling for the current reader.
 func RestartReaderPoler() {
 	logger.Debug("Restarting reader poller...")
 	go createdPoller.readerPoller(createdPoller.currentReader)

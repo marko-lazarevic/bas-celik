@@ -10,6 +10,7 @@ var latin = []string{
 	"a", "b", "v", "g", "d", "đ", "e", "ž", "z", "i", "j", "k", "l", "lj", "m", "n", "nj", "o", "p", "r", "s", "t", "ć", "u", "f", "h", "c", "č", "dž", "š",
 }
 
+// CyrillicToLatin converts a string from Cyrillic script to Latin script.
 func CyrillicToLatin(str string) string {
 	out := ""
 

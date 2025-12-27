@@ -17,14 +17,16 @@ import (
 
 const xmlHeader = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
 
-type GetSignedXmlInput struct {
+// GetSignedXMLInput represents the input parameters for the getSignedXml operation.
+type GetSignedXMLInput struct {
 	Certificate CertificateAlias `json:"certificate"`
 	Pin         string           `json:"pin"`
-	Xml         string           `json:"xml"`
+	XML         string           `json:"xml"`
 }
 
-type GetSignedXmlPayload struct {
-	Xml string `json:"xml"`
+// GetSignedXMLPayload represents the response payload for the getSignedXml operation.
+type GetSignedXMLPayload struct {
+	XML string `json:"xml"`
 }
 
 type envelopeReq struct {
@@ -42,7 +44,7 @@ type envelopeResp struct {
 
 type signature struct {
 	XMLName        xml.Name
-	Xmlns          string `xml:"xmlns,attr"`
+	XMLns          string `xml:"xmlns,attr"`
 	SignedInfo     signedInfo
 	SignatureValue string
 	KeyInfo        struct {
@@ -59,7 +61,7 @@ type signature struct {
 
 type signedInfo struct {
 	XMLName                xml.Name
-	Xmlns                  string `xml:"xmlns,attr,omitempty"`
+	XMLns                  string `xml:"xmlns,attr,omitempty"`
 	Ns2                    string `xml:"xmlns:ns2,attr,omitempty"`
 	CanonicalizationMethod struct {
 		Algorithm string `xml:",attr"`
@@ -68,7 +70,7 @@ type signedInfo struct {
 		Algorithm string `xml:",attr"`
 	}
 	Reference struct {
-		Uri        string `xml:"URI,attr"`
+		URI        string `xml:"URI,attr"`
 		Transforms struct {
 			Transform struct {
 				Algorithm string `xml:",attr"`
@@ -81,8 +83,8 @@ type signedInfo struct {
 	}
 }
 
-func (s *SmartBoxServer) handleGetSignedXml(session *SmartboxSession, data []byte, w io.Writer) error {
-	msg := Message[GetSignedXmlInput]{}
+func (s *SmartBoxServer) handleGetSignedXML(session *SmartboxSession, data []byte, w io.Writer) error {
+	msg := Message[GetSignedXMLInput]{}
 	if err := json.Unmarshal(data, &msg); err != nil {
 		return err
 	}
@@ -91,20 +93,20 @@ func (s *SmartBoxServer) handleGetSignedXml(session *SmartboxSession, data []byt
 		return fmt.Errorf("pkcs11 module not loaded")
 	}
 
-	certId, err := hex.DecodeString(msg.Input.Certificate.Alias)
+	certID, err := hex.DecodeString(msg.Input.Certificate.Alias)
 	if err != nil {
 		return err
 	}
 
-	signXML, err := signRequest(session.module, certId, msg.Input.Xml)
+	signXML, err := signRequest(session.module, certID, msg.Input.XML)
 	if err != nil {
 		return err
 	}
 
-	rsp := Response[GetSignedXmlPayload]{
+	rsp := Response[GetSignedXMLPayload]{
 		Operation: operationGetCertificates,
-		Payload: GetSignedXmlPayload{
-			Xml: base64.StdEncoding.EncodeToString(signXML),
+		Payload: GetSignedXMLPayload{
+			XML: base64.StdEncoding.EncodeToString(signXML),
 		},
 	}
 
@@ -119,7 +121,7 @@ func signRequest(module PkcsModuleSession, id []byte, base64XmlRequest string) (
 
 	var cert *x509.Certificate
 	for _, namedCert := range namedCerts {
-		if slices.Equal(namedCert.Id, id) {
+		if slices.Equal(namedCert.ID, id) {
 			cert = namedCert.Certificate
 		}
 	}
@@ -151,7 +153,10 @@ func signRequest(module PkcsModuleSession, id []byte, base64XmlRequest string) (
 		return nil, err
 	}
 
-	module.CloseSession()
+	err = module.CloseSession()
+	if err != nil {
+		return nil, err
+	}
 
 	envelope := constructResponse(cert, timestamp, signedInfo, signed)
 
@@ -160,7 +165,10 @@ func signRequest(module PkcsModuleSession, id []byte, base64XmlRequest string) (
 
 	enc := xml.NewEncoder(&buf)
 	enc.Indent("", "")
-	enc.Encode(envelope)
+	err = enc.Encode(envelope)
+	if err != nil {
+		return nil, err
+	}
 
 	return buf.Bytes(), nil
 }
@@ -178,7 +186,7 @@ func extractTimestamp(input []byte) (string, error) {
 func constructResponse(cert *x509.Certificate, timestamp string, signedInfo signedInfo, signatureValue []byte) envelopeResp {
 	signatureValueBase64 := base64.StdEncoding.EncodeToString(signatureValue)
 
-	signedInfo.Xmlns = ""
+	signedInfo.XMLns = ""
 	signedInfo.Ns2 = ""
 
 	signature := signatureXML(cert, signedInfo, signatureValueBase64)
@@ -196,7 +204,7 @@ func constructSignedInfo(digestValue string) signedInfo {
 	signedInfo := signedInfo{}
 
 	signedInfo.XMLName = xml.Name{Local: "SignedInfo"}
-	signedInfo.Xmlns = "http://www.w3.org/2000/09/xmldsig#"
+	signedInfo.XMLns = "http://www.w3.org/2000/09/xmldsig#"
 	signedInfo.Ns2 = "urn:poreskauprava.gov.rs/zim"
 	signedInfo.CanonicalizationMethod.Algorithm = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315"
 	signedInfo.SignatureMethod.Algorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
@@ -210,7 +218,7 @@ func constructSignedInfo(digestValue string) signedInfo {
 func signatureXML(cert *x509.Certificate, signedInfo signedInfo, signatureValue string) signature {
 	sig := signature{}
 	sig.XMLName = xml.Name{Local: "Signature"}
-	sig.Xmlns = "http://www.w3.org/2000/09/xmldsig#"
+	sig.XMLns = "http://www.w3.org/2000/09/xmldsig#"
 
 	sig.SignedInfo = signedInfo
 	sig.SignatureValue = signatureValue
@@ -226,7 +234,10 @@ func (s *signedInfo) marshal() []byte {
 	buf := bytes.Buffer{}
 	enc := xml.NewEncoder(&buf)
 	enc.Indent("", "")
-	enc.Encode(s)
+	err := enc.Encode(s)
+	if err != nil {
+		return nil
+	}
 
 	return buf.Bytes()
 }

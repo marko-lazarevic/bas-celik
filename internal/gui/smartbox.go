@@ -34,9 +34,9 @@ func startSmartboxUI() {
 	}
 
 	rows := container.New(layout.NewVBoxLayout(), state.toolbar, state.startPage, state.statusBar)
-	state.documentUi = rows
+	state.documentUI = rows
 
-	state.mainContainer.Add(state.documentUi)
+	state.mainContainer.Add(state.documentUI)
 
 	address, err := server.StartServer(modulePaths)
 
@@ -56,7 +56,6 @@ func startSmartboxUI() {
 }
 
 func getVendorPreferenceKey(vendor pkcs11.CardVendor) string {
-
 	switch vendor {
 	case pkcs11.CardVendorHalcom:
 		return halcomPkcsPathKey

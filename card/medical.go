@@ -13,7 +13,7 @@ import (
 	"golang.org/x/text/transform"
 )
 
-// Represents a smart card that holds a Serbian medical insurance document.
+// MedicalCard represents a smart card that holds a Serbian medical insurance document.
 type MedicalCard struct {
 	atr                  Atr
 	smartCard            Card
@@ -23,31 +23,32 @@ type MedicalCard struct {
 	variableAdminFile    []byte
 }
 
-// Possibly the first version of the medical card. Newer version has the GEMALTO_ATR_2 for the ATR.
+// MEDICAL_ATR_1 is possibly the first version of the medical card. Newer version has the GEMALTO_ATR_2 for the ATR.
 var MEDICAL_ATR_1 = Atr([]byte{
 	0x3B, 0xF4, 0x13, 0x00, 0x00, 0x81, 0x31, 0xFE,
 	0x45, 0x52, 0x46, 0x5A, 0x4F, 0xED,
 })
 
-// Available since March 2023?
+// MEDICAL_ATR_2 is available since March 2023.
 var MEDICAL_ATR_2 = Atr([]byte{
 	0x3B, 0x9E, 0x97, 0x80, 0x31, 0xFE, 0x45, 0x53,
 	0x43, 0x45, 0x20, 0x38, 0x2E, 0x30, 0x2D, 0x43,
 	0x31, 0x56, 0x30, 0x0D, 0x0A, 0x6E,
 })
 
-// Location of the file with document data.
+// MED_DOCUMENT_FILE_LOC is the location of the file with document data.
 var MED_DOCUMENT_FILE_LOC = []byte{0x0D, 0x01}
 
-// Location of the file with fixed personal data.
+// MED_FIXED_PERSONAL_FILE_LOC is the location of the file with fixed personal data.
 var MED_FIXED_PERSONAL_FILE_LOC = []byte{0x0D, 0x02}
 
-// Location of the file with variable personal data.
+// MED_VARIABLE_PERSONAL_FILE_LOC is the location of the file with variable personal data.
 var MED_VARIABLE_PERSONAL_FILE_LOC = []byte{0x0D, 0x03}
 
-// Location of the file with variable administrative data.
+// MED_VARIABLE_ADMIN_FILE_LOC is the location of the file with variable administrative data.
 var MED_VARIABLE_ADMIN_FILE_LOC = []byte{0x0D, 0x04}
 
+// InitCard initializes the medical card.
 func (card *MedicalCard) InitCard() error {
 	s1 := []byte{0xF3, 0x81, 0x00, 0x00, 0x02, 0x53, 0x45, 0x52, 0x56, 0x53, 0x5A, 0x4B, 0x01}
 	apu := buildAPDU(0x00, 0xA4, 0x04, 0x00, s1, 0)
@@ -64,6 +65,7 @@ func (card *MedicalCard) InitCard() error {
 	return nil
 }
 
+// ReadCard reads all files from the medical card.
 func (card *MedicalCard) ReadCard() error {
 	var err error
 
@@ -90,6 +92,7 @@ func (card *MedicalCard) ReadCard() error {
 	return nil
 }
 
+// GetDocument parses and returns the medical document from the card.
 func (card *MedicalCard) GetDocument() (document.Document, error) {
 	doc := document.MedicalDocument{}
 
@@ -116,6 +119,7 @@ func (card *MedicalCard) GetDocument() (document.Document, error) {
 	return &doc, nil
 }
 
+// Atr returns the Answer To Reset of the medical card.
 func (card *MedicalCard) Atr() Atr {
 	return card.atr
 }
@@ -134,6 +138,7 @@ func descramble(fields map[uint][]byte, tag uint) {
 	fields[tag] = []byte{}
 }
 
+// ReadFile reads a file from the medical card.
 func (card *MedicalCard) ReadFile(name []byte) ([]byte, error) {
 	output := make([]byte, 0)
 
@@ -186,7 +191,8 @@ func (card *MedicalCard) selectFile(name []byte) ([]byte, error) {
 	return rsp, nil
 }
 
-// Newer medical cards share ATR with the ID cards (GEMALTO_ATR_2)
+// Test verifies whether the medical card can be read.
+// Newer medical cards share ATR with the ID cards (GEMALTO_ATR_2).
 func (card *MedicalCard) Test() bool {
 	s1 := []byte{0xF3, 0x81, 0x00, 0x00, 0x02, 0x53, 0x45, 0x52, 0x56, 0x53, 0x5A, 0x4B, 0x01}
 	apu := buildAPDU(0x00, 0xA4, 0x04, 0x00, s1, 0)
@@ -218,7 +224,7 @@ func parseMedicalDocumentFile(data []byte, doc *document.MedicalDocument) error 
 	descramble(fields, 1553)
 	tlv.AssignField(fields, 1553, &doc.InsurerName)
 	tlv.AssignField(fields, 1554, &doc.InsurerID)
-	tlv.AssignField(fields, 1555, &doc.CardId)
+	tlv.AssignField(fields, 1555, &doc.CardID)
 	tlv.AssignField(fields, 1557, &doc.DateOfIssue)
 	localization.FormatDate(&doc.DateOfIssue)
 	tlv.AssignField(fields, 1558, &doc.DateOfExpiry)
@@ -291,7 +297,7 @@ func parseMedicalVariableAdminFile(data []byte, doc *document.MedicalDocument) e
 	descramble(fields, 1616)
 	tlv.AssignField(fields, 1616, &doc.CarrierRelationship)
 	tlv.AssignBoolField(fields, 1617, &doc.CarrierFamilyMember)
-	tlv.AssignField(fields, 1618, &doc.CarrierIdNumber)
+	tlv.AssignField(fields, 1618, &doc.CarrierIDNumber)
 	tlv.AssignField(fields, 1619, &doc.CarrierInsurantNumber)
 	descramble(fields, 1620)
 	tlv.AssignField(fields, 1620, &doc.CarrierFamilyName)
@@ -309,9 +315,9 @@ func parseMedicalVariableAdminFile(data []byte, doc *document.MedicalDocument) e
 	tlv.AssignField(fields, 1630, &doc.TaxpayerName)
 	descramble(fields, 1631)
 	tlv.AssignField(fields, 1631, &doc.TaxpayerResidence)
-	tlv.AssignField(fields, 1632, &doc.TaxpayerIdNumber)
-	if len(doc.TaxpayerIdNumber) == 0 {
-		tlv.AssignField(fields, 1633, &doc.TaxpayerIdNumber)
+	tlv.AssignField(fields, 1632, &doc.TaxpayerIDNumber)
+	if len(doc.TaxpayerIDNumber) == 0 {
+		tlv.AssignField(fields, 1633, &doc.TaxpayerIDNumber)
 	}
 	tlv.AssignField(fields, 1634, &doc.TaxpayerActivityCode)
 

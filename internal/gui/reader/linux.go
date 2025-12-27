@@ -13,5 +13,5 @@ func (rp *ReaderPoller) waitForReaderChange(_ int) {
 	}
 
 	states := []scard.ReaderState{state}
-	rp.readerListerContext.GetStatusChange(states, -1)
+	_ = rp.readerListerContext.GetStatusChange(states, -1)
 }

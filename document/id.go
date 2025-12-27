@@ -15,13 +15,20 @@ import (
 	"github.com/ubavic/bas-celik/v2/localization"
 )
 
+// ID_TYPE_APOLLO represents Apollo ID card type.
 const ID_TYPE_APOLLO = ""
+
+// ID_TYPE_ID represents Serbian ID card type.
 const ID_TYPE_ID = "ID"
+
+// ID_TYPE_IDENTITY_FOREIGNER represents identity card for foreigners.
 const ID_TYPE_IDENTITY_FOREIGNER = "IF"
+
+// ID_TYPE_RESIDENCE_PERMIT represents residence permit type.
 const ID_TYPE_RESIDENCE_PERMIT = "RP"
 
-// Represents a document stored on a Serbian ID card.
-type IdDocument struct {
+// IDDocument represents a document stored on a Serbian ID card.
+type IDDocument struct {
 	Portrait             image.Image
 	DocRegNo             string
 	DocumentType         string
@@ -58,11 +65,13 @@ type IdDocument struct {
 	AddressLabel         string
 }
 
-func (doc *IdDocument) GetFullName() string {
+// GetFullName returns the full name of the ID document holder.
+func (doc *IDDocument) GetFullName() string {
 	return localization.JoinWithComma(doc.GivenName, doc.ParentGivenName, doc.Surname)
 }
 
-func (doc *IdDocument) GetFullAddress(reverse bool) string {
+// GetFullAddress returns the full address of the ID document holder.
+func (doc *IDDocument) GetFullAddress(reverse bool) string {
 	var streetAndNumber = doc.Street
 
 	if doc.HouseNumber != "" || doc.HouseLetter != "" || doc.Entrance != "" {
@@ -84,11 +93,13 @@ func (doc *IdDocument) GetFullAddress(reverse bool) string {
 	}
 }
 
-func (doc *IdDocument) GetFullPlaceOfBirth() string {
+// GetFullPlaceOfBirth returns the full place of birth including community and state.
+func (doc *IDDocument) GetFullPlaceOfBirth() string {
 	return localization.JoinWithComma(doc.PlaceOfBirth, doc.CommunityOfBirth, doc.StateOfBirth)
 }
 
-func (doc *IdDocument) BuildPdf() (data []byte, fileName string, retErr error) {
+// BuildPdf creates a PDF representation of the IdDocument.
+func (doc *IDDocument) BuildPdf() (data []byte, fileName string, retErr error) {
 	defer func() {
 		if r := recover(); r != nil {
 			switch x := r.(type) {
@@ -115,7 +126,7 @@ func (doc *IdDocument) BuildPdf() (data []byte, fileName string, retErr error) {
 		panic(fmt.Errorf("setting font: %w", err))
 	}
 
-	ipw := IdPdfWriter{
+	ipw := IDPdfWriter{
 		pdf:            &pdf,
 		leftMargin:     58.8,
 		rightMargin:    535,
@@ -123,11 +134,12 @@ func (doc *IdDocument) BuildPdf() (data []byte, fileName string, retErr error) {
 		doc:            doc,
 	}
 
-	if doc.DocumentType == ID_TYPE_APOLLO || doc.DocumentType == ID_TYPE_ID {
-		ipw.printRegularId()
-	} else if doc.DocumentType == ID_TYPE_IDENTITY_FOREIGNER {
-		ipw.printForeignerId()
-	} else if doc.DocumentType == ID_TYPE_RESIDENCE_PERMIT {
+	switch doc.DocumentType {
+	case ID_TYPE_APOLLO, ID_TYPE_ID:
+		ipw.printRegularID()
+	case ID_TYPE_IDENTITY_FOREIGNER:
+		ipw.printForeignerID()
+	case ID_TYPE_RESIDENCE_PERMIT:
 		ipw.printResidencePermit()
 	}
 
@@ -143,14 +155,15 @@ func (doc *IdDocument) BuildPdf() (data []byte, fileName string, retErr error) {
 	return pdf.GetBytesPdf(), fileName, nil
 }
 
-func (doc *IdDocument) BuildJson() ([]byte, error) {
+// BuildJson creates a JSON representation of the IdDocument.
+func (doc *IDDocument) BuildJson() ([]byte, error) {
 	var bs bytes.Buffer
 	err := jpeg.Encode(&bs, doc.Portrait, &jpeg.Options{Quality: 100})
 	if err != nil {
 		return nil, fmt.Errorf("creating json: %w", err)
 	}
 
-	type Alias IdDocument
+	type Alias IDDocument
 	return json.Marshal(&struct {
 		Portrait string
 		*Alias
@@ -160,12 +173,13 @@ func (doc *IdDocument) BuildJson() ([]byte, error) {
 	})
 }
 
-func (doc *IdDocument) BuildExcel() ([]byte, string, error) {
+// BuildExcel creates an Excel representation of the IdDocument.
+func (doc *IDDocument) BuildExcel() ([]byte, string, error) {
 	xlsx, err := CreateExcel(*doc)
 	filename := doc.formatFilename() + ".xlsx"
 	return xlsx, filename, err
 }
 
-func (doc *IdDocument) formatFilename() string {
+func (doc *IDDocument) formatFilename() string {
 	return strings.ToLower(doc.GivenName + "_" + doc.Surname)
 }

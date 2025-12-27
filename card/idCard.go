@@ -10,19 +10,19 @@ import (
 	"github.com/ubavic/bas-celik/v2/localization"
 )
 
-// Location of the file with document data.
+// ID_DOCUMENT_FILE_LOC is the location of the file with document data.
 var ID_DOCUMENT_FILE_LOC = []byte{0x0F, 0x02}
 
-// Location of the file with personal data.
+// ID_PERSONAL_FILE_LOC is the location of the file with personal data.
 var ID_PERSONAL_FILE_LOC = []byte{0x0F, 0x03}
 
-// Location of the file with residence data.
+// ID_RESIDENCE_FILE_LOC is the location of the file with residence data.
 var ID_RESIDENCE_FILE_LOC = []byte{0x0F, 0x04}
 
-// Location of the the portrait. Portrait is encoded as JPEG.
+// ID_PHOTO_FILE_LOC is the location of the portrait. Portrait is encoded as JPEG.
 var ID_PHOTO_FILE_LOC = []byte{0x0F, 0x06}
 
-func parseIdDocumentFile(data []byte, doc *document.IdDocument) error {
+func parseIDDocumentFile(data []byte, doc *document.IDDocument) error {
 	fields, err := tlv.ParseTLV(data)
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func parseIdDocumentFile(data []byte, doc *document.IdDocument) error {
 	return nil
 }
 
-func parseIdPersonalFile(data []byte, doc *document.IdDocument) error {
+func parseIDPersonalFile(data []byte, doc *document.IDDocument) error {
 	fields, err := tlv.ParseTLV(data)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func parseIdPersonalFile(data []byte, doc *document.IdDocument) error {
 	return nil
 }
 
-func parseIdResidenceFile(data []byte, doc *document.IdDocument) error {
+func parseIDResidenceFile(data []byte, doc *document.IDDocument) error {
 	fields, err := tlv.ParseTLV(data)
 	if err != nil {
 		return err
@@ -86,7 +86,7 @@ func parseIdResidenceFile(data []byte, doc *document.IdDocument) error {
 	return nil
 }
 
-func parseAndAssignIdPhotoFile(data []byte, doc *document.IdDocument) error {
+func parseAndAssignIDPhotoFile(data []byte, doc *document.IDDocument) error {
 	img, _, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
 		return fmt.Errorf("decoding photo file: %w", err)

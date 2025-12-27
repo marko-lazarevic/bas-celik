@@ -11,11 +11,7 @@ func buildAPDU(cla, ins, p1, p2 byte, data []byte, ne uint) []byte {
 		panic(fmt.Errorf("APDU command length too large"))
 	}
 
-	apdu := make([]byte, 4)
-	apdu[0] = cla
-	apdu[1] = ins
-	apdu[2] = p1
-	apdu[3] = p2
+	apdu := []byte{cla, ins, p1, p2}
 
 	if length == 0 {
 		if ne != 0 {

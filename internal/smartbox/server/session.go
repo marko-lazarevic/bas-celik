@@ -1,3 +1,4 @@
+// Package server implements the Smartbox server functionality.
 package server
 
 import (
@@ -6,22 +7,25 @@ import (
 	"github.com/ubavic/bas-celik/v2/internal/smartbox/pkcs11"
 )
 
+// PkcsModuleSession defines the interface for PKCS#11 module sessions.
 type PkcsModuleSession interface {
 	ListSlots() ([]uint, []string, error)
 	OpenSessionAndLogin(pin string, terminalIndex int) error
 	GetCertificates() ([]pkcs11.NamedCert, error)
-	Sign(certId []byte, message []byte) ([]byte, error)
+	Sign(certID []byte, message []byte) ([]byte, error)
 	CloseSession() error
 }
 
+// SmartboxSession represents a session with the Smartbox server.
 type SmartboxSession struct {
 	id            string
 	module        PkcsModuleSession
-	terminalId    int
+	terminalID    int
 	vendor        pkcs11.CardVendor
-	certificateId string
+	certificateID string
 }
 
+// ModulePath represents the path to a PKCS#11 module along with its vendor.
 type ModulePath struct {
 	Vendor pkcs11.CardVendor
 	Path   string

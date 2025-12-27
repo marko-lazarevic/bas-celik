@@ -24,7 +24,7 @@ var documentMedical2 = document.MedicalDocument{
 	CarrierFamilyName:      "Петровић",
 	InsurantNumber:         "12345678",
 	InsuranceStartDate:     "29.03.2014",
-	CardId:                 "12345678901",
+	CardID:                 "12345678901",
 }
 var documentMedical3 = document.MedicalDocument{
 	GivenNameLatin:  "Pablo Diego",
@@ -138,7 +138,6 @@ func Test_GetExpiryDateFromRfzo(t *testing.T) {
 	if err != document.ErrInvalidInsuranceNo {
 		t.Errorf("Expected the InvalidInsuranceNo error but got %v", err)
 	}
-
 }
 
 func Test_parseDateFromRfzoResponse(t *testing.T) {

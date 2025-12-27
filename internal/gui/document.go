@@ -13,7 +13,7 @@ import (
 	"github.com/ubavic/bas-celik/v2/localization"
 )
 
-func pageID(doc *document.IdDocument) *fyne.Container {
+func pageID(doc *document.IDDocument) *fyne.Container {
 	var personalInformationGroupObjects, docGroupObjects []fyne.CanvasObject
 
 	widthThird := (350 - 2*theme.Padding()) / 3
@@ -34,11 +34,12 @@ func pageID(doc *document.IdDocument) *fyne.Container {
 	purposeOfStayLabel := t("id.purposeOfStay")
 	eNoteLabel := t("id.eNote")
 
-	if doc.DocumentType == document.ID_TYPE_IDENTITY_FOREIGNER {
+	switch doc.DocumentType {
+	case document.ID_TYPE_IDENTITY_FOREIGNER:
 		personalInformationGroupObjects = append(personalInformationGroupObjects,
 			widgets.NewField(nationalityLabel, doc.NationalityFull, 200),
 			widgets.NewField(foreignerStatusLabel, doc.StatusOfForeigner, 200))
-	} else if doc.DocumentType == document.ID_TYPE_RESIDENCE_PERMIT {
+	case document.ID_TYPE_RESIDENCE_PERMIT:
 		personalInformationGroupObjects = append(personalInformationGroupObjects,
 			widgets.NewField(nationalityLabel, doc.NationalityFull, 200),
 			widgets.NewField(purposeOfStayLabel, doc.PurposeOfStay, 200),
@@ -113,14 +114,14 @@ func pageMedical(doc *document.MedicalDocument) *fyne.Container {
 
 	carrierNameF := widgets.NewField(t("medical.carrier"), doc.CarrierGivenNameLatin+" "+doc.CarrierFamilyNameLatin, 350)
 	carrierInsurantNumberF := widgets.NewField(t("medical.insuranceNumber"), doc.CarrierInsurantNumber, 170)
-	carrierIdNumberF := widgets.NewField(t("medical.personalNumber"), doc.CarrierIdNumber, 170)
-	carrierRow1 := container.New(layout.NewHBoxLayout(), carrierInsurantNumberF, carrierIdNumberF)
+	carrierIDNumberF := widgets.NewField(t("medical.personalNumber"), doc.CarrierIDNumber, 170)
+	carrierRow1 := container.New(layout.NewHBoxLayout(), carrierInsurantNumberF, carrierIDNumberF)
 
 	carrierFamilyMemberF := widgets.NewField(t("medical.familyMember"), localization.FormatYesNo(doc.CarrierFamilyMember, translation.CurrentLanguage()), 170)
 	carrierRelationshipF := widgets.NewField(t("medical.relationship"), doc.CarrierRelationship, 170)
 	carrierRow2 := container.New(layout.NewHBoxLayout(), carrierFamilyMemberF, carrierRelationshipF)
 	carrierGroup := widgets.NewGroup(t("medical.insuranceCarrierInformation"), carrierNameF, carrierRow1, carrierRow2)
-	cardNumber := widgets.NewField(t("medical.cardId"), doc.CardId, 270)
+	cardNumber := widgets.NewField(t("medical.cardId"), doc.CardID, 270)
 	dateOfIssueF := widgets.NewField(t("medical.dateOfIssue"), doc.DateOfIssue, 170)
 	dateOfExpiryF := widgets.NewField(t("medical.dateOfExpiry"), doc.DateOfExpiry, 170)
 	cardRow1 := container.New(layout.NewHBoxLayout(), dateOfIssueF, dateOfExpiryF)
@@ -136,8 +137,8 @@ func pageMedical(doc *document.MedicalDocument) *fyne.Container {
 	taxpayerPlaceF := widgets.NewField(t("medical.taxpayerResidence"), doc.TaxpayerResidence, 170)
 	taxpayerRow1 := container.New(layout.NewHBoxLayout(), taxpayerActivityCodeF, taxpayerPlaceF)
 	taxpayerNumberF := widgets.NewField(t("medical.taxpayerNumber"), doc.TaxpayerNumber, 170)
-	taxpayerIdNumberF := widgets.NewField(t("medical.taxpayerIdNumber"), doc.TaxpayerIdNumber, 170)
-	taxpayerRow2 := container.New(layout.NewHBoxLayout(), taxpayerNumberF, taxpayerIdNumberF)
+	taxpayerIDNumberF := widgets.NewField(t("medical.taxpayerIdNumber"), doc.TaxpayerIDNumber, 170)
+	taxpayerRow2 := container.New(layout.NewHBoxLayout(), taxpayerNumberF, taxpayerIDNumberF)
 
 	taxpayerGroup := widgets.NewGroup(t("medical.taxpayerInformation"), taxpayerNameF, taxpayerRow1, taxpayerRow2)
 
@@ -157,9 +158,9 @@ func pageVehicle(doc *document.VehicleDocument) *fyne.Container {
 	expiryDateF := widgets.NewField(t("vehicle.expiryDate"), doc.ExpiryDate, 220)
 	dateRow := container.New(layout.NewHBoxLayout(), issuingDateF, expiryDateF)
 	competentAuthorityF := widgets.NewField(t("vehicle.competentAuthority"), doc.CompetentAuthority, 350)
-	docIdF := widgets.NewField(t("vehicle.unambiguousNumber"), doc.UnambiguousNumber, 220)
+	docIDF := widgets.NewField(t("vehicle.unambiguousNumber"), doc.UnambiguousNumber, 220)
 	serialNumberF := widgets.NewField(t("vehicle.serialNumber"), doc.SerialNumber, 220)
-	idRow := container.New(layout.NewHBoxLayout(), docIdF, serialNumberF)
+	idRow := container.New(layout.NewHBoxLayout(), docIDF, serialNumberF)
 	documentGroup := widgets.NewGroup(t("vehicle.documentInformation"), issueRow, dateRow, competentAuthorityF, idRow)
 
 	ownerNoLbl := ""
@@ -216,7 +217,7 @@ func pageVehicle(doc *document.VehicleDocument) *fyne.Container {
 	powerMassRatioF := widgets.NewField(t("vehicle.powerWeightRatio"), doc.PowerWeightRatio, 220)
 	vehicleRow4 := container.New(layout.NewHBoxLayout(), enginePowerF, powerMassRatioF)
 
-	engineNumberF := widgets.NewField(t("vehicle.engineIdNumber"), doc.EngineIdNumber, 220)
+	engineNumberF := widgets.NewField(t("vehicle.engineIdNumber"), doc.EngineIDNumber, 220)
 	engineCapacityF := widgets.NewField(t("vehicle.engineCapacity"), doc.EngineCapacity, 220)
 	vehicleRow5 := container.New(layout.NewHBoxLayout(), engineNumberF, engineCapacityF)
 

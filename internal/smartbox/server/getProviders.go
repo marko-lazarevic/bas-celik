@@ -5,14 +5,17 @@ import (
 	"io"
 )
 
+// GetProvidersInput represents the input parameters for retrieving available PKCS#11 providers.
 type GetProvidersInput struct{}
 
+// GetProvidersPayload represents the response payload containing a list of available providers.
 type GetProvidersPayload struct {
 	Providers []Provider `json:"providers"`
 }
 
+// Provider represents a PKCS#11 provider with its ID and name.
 type Provider struct {
-	Id   int    `json:"id"`
+	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -25,7 +28,7 @@ func (s *SmartBoxServer) handleGetProviders(data []byte, w io.Writer) error {
 	providers := make([]Provider, 0, len(s.modulePaths))
 	for _, module := range s.modulePaths {
 		providers = append(providers, Provider{
-			Id:   int(module.Vendor),
+			ID:   int(module.Vendor),
 			Name: module.Vendor.String(),
 		})
 	}

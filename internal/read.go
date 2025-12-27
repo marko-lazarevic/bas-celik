@@ -11,9 +11,10 @@ import (
 	"github.com/ubavic/bas-celik/v2/document"
 )
 
+// LaunchConfig contains configuration options for launching the application.
 type LaunchConfig struct {
 	PdfPath               string
-	JsonPath              string
+	JSONPath              string
 	ExcelPath             string
 	Verbose               bool
 	GetValidUntilFromRfzo bool
@@ -35,9 +36,9 @@ func readAndSave(cfg LaunchConfig) error {
 		}
 	}
 
-	if len(cfg.JsonPath) > 0 {
-		if _, err := os.Stat(cfg.JsonPath); err != nil && !errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("opening file %s: %w", cfg.JsonPath, err)
+	if len(cfg.JSONPath) > 0 {
+		if _, err := os.Stat(cfg.JSONPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("opening file %s: %w", cfg.JSONPath, err)
 		}
 	}
 
@@ -109,15 +110,15 @@ func readAndSave(cfg LaunchConfig) error {
 		}
 	}
 
-	if len(cfg.JsonPath) > 0 {
+	if len(cfg.JSONPath) > 0 {
 		json, err := doc.BuildJson()
 		if err != nil {
 			return fmt.Errorf("generating json: %w", err)
 		}
 
-		err = os.WriteFile(cfg.JsonPath, json, 0600)
+		err = os.WriteFile(cfg.JSONPath, json, 0600)
 		if err != nil {
-			return fmt.Errorf("writing file %s: %w", cfg.JsonPath, err)
+			return fmt.Errorf("writing file %s: %w", cfg.JSONPath, err)
 		}
 	}
 
