@@ -1,6 +1,6 @@
 module github.com/ubavic/bas-celik/v2
 
-go 1.24.2
+go 1.25.5
 
 require (
 	fyne.io/fyne/v2 v2.5.3
@@ -9,7 +9,7 @@ require (
 	github.com/miekg/pkcs11 v1.1.1
 	github.com/signintech/gopdf v0.33.0
 	github.com/xuri/excelize/v2 v2.9.1
-	golang.org/x/text v0.27.0
+	golang.org/x/text v0.31.0
 )
 
 require (
@@ -43,10 +43,10 @@ require (
 	github.com/xuri/efp v0.0.1 // indirect
 	github.com/xuri/nfp v0.0.1 // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
-	golang.org/x/crypto v0.40.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/image v0.25.0 // indirect
 	golang.org/x/mobile v0.0.0-20241213221354-a87c1cf6cf46 // indirect
-	golang.org/x/net v0.42.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
