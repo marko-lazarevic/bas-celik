@@ -27,4 +27,6 @@ bin/
 .DS_Store
 todo.md
 
+/vendor
+
 !/embed/translation/*.json
