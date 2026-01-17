@@ -10,7 +10,7 @@ import (
 func FormatState(state scard.StateFlag) string {
 	states := []string{}
 
-	if state&scard.StateUnaware != 0 {
+	if state==0 && state&scard.StateUnaware == 0 {
 		states = append(states, "StateUnaware")
 	}
 	if state&scard.StateIgnore != 0 {
