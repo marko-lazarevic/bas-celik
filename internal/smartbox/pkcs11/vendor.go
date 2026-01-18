@@ -17,6 +17,27 @@ const (
 	CardVendorPks
 )
 
+var (
+	linuxVendorPaths = map[CardVendor]string{
+		CardVendorPosta:  "/usr/lib/libaetpkss.so",
+		CardVendorEsmart: "/usr/lib/libeToken.so",
+	}
+
+	darwinVendorPaths = map[CardVendor]string{
+		CardVendorPosta:  "/Applications/tokenadmin.app/Contents/Frameworks/libaetpkss.dylib",
+		CardVendorEsmart: "/Library/Frameworks/eToken.framework/Versions/A/libIDPrimePKCS11.dylib",
+		CardVendorHalcom: "/Applications/Personal.app/Contents/Frameworks/libtokenapi.dylib",
+	}
+
+	windowsVendorPaths = map[CardVendor]string{
+		CardVendorHalcom: "C:\\Program Files (x86)\\Personal\\bin64\\personal64.dll",
+		CardVendorPosta:  "C:\\Windows\\System32\\aetpkss1.dll",
+		CardVendorEsmart: "C:\\Program Files\\SafeNet\\Authentication\\SAC\\x64\\IDPrimePKCS1164.dll",
+		CardVendorMup:    "C:\\Program Files\\TrustEdgeID\\netsetpkcs11_x64.dll",
+		CardVendorPks:    "C:\\Program Files\\TrustEdgeID\\netsetpkcs11_x64.dll",
+	}
+)
+
 // String returns the string representation of the CardVendor.
 func (cv CardVendor) String() string {
 	switch cv {
@@ -37,44 +58,18 @@ func (cv CardVendor) String() string {
 
 // GetDefaultPath returns the default PKCS#11 library path for the given card vendor and operating system.
 func GetDefaultPath(cv CardVendor, os string) string {
-	if os == "linux" {
-		switch cv {
-		case CardVendorPosta:
-			return "/usr/lib/libaetpkss.so"
-		case CardVendorEsmart:
-			return "/usr/lib/libeToken.so"
-		default:
-			return ""
+	switch os {
+	case "linux":
+		if path, ok := linuxVendorPaths[cv]; ok {
+			return path
 		}
-	}
-
-	if os == "darwin" {
-		switch cv {
-		case CardVendorPosta:
-			return "/Applications/tokenadmin.app/Contents/Frameworks/libaetpkss.dylib"
-		case CardVendorEsmart:
-			return "/Library/Frameworks/eToken.framework/Versions/A/libIDPrimePKCS11.dylib"
-		case CardVendorHalcom:
-			return "/Applications/Personal.app/Contents/Frameworks/libtokenapi.dylib"
-		default:
-			return ""
+	case "darwin":
+		if path, ok := darwinVendorPaths[cv]; ok {
+			return path
 		}
-	}
-
-	if os == "windows" {
-		switch cv {
-		case CardVendorHalcom:
-			return "C:\\Program Files (x86)\\Personal\\bin64\\personal64.dll"
-		case CardVendorPosta:
-			return "C:\\Windows\\System32\\aetpkss1.dll"
-		case CardVendorEsmart:
-			return "C:\\Program Files\\SafeNet\\Authentication\\SAC\\x64\\IDPrimePKCS1164.dll"
-		case CardVendorMup:
-			return "C:\\Program Files\\TrustEdgeID\\netsetpkcs11_x64.dll"
-		case CardVendorPks:
-			return "C:\\Program Files\\TrustEdgeID\\netsetpkcs11_x64.dll"
-		default:
-			return ""
+	case "windows":
+		if path, ok := windowsVendorPaths[cv]; ok {
+			return path
 		}
 	}
 

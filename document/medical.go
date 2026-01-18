@@ -101,6 +101,25 @@ func (doc *MedicalDocument) GetFullPlaceAddress() string {
 	return localization.JoinWithComma(doc.Place, doc.Municipality, doc.Country)
 }
 
+func putMedicalData(pdf *gopdf.GoPdf, textLeftMargin float64, label string, data string) {
+		cell(pdf, label)
+		pdf.SetXY(textLeftMargin+144, pdf.GetY())
+
+		texts, err := pdf.SplitTextWithWordWrap(data, 350)
+		if err != nil && err != gopdf.ErrEmptyString {
+			panic(fmt.Errorf("splitting text: %w", err))
+		}
+
+		for i, text := range texts {
+			cell(pdf, text)
+			if i < len(texts)-1 {
+				pdf.SetXY(textLeftMargin+144, pdf.GetY()+11)
+			}
+		}
+
+		pdf.SetXY(textLeftMargin, pdf.GetY()+14)
+}
+
 // BuildPdf creates a PDF representation of the MedicalDocument.
 func (doc *MedicalDocument) BuildPdf() (data []byte, fileName string, retErr error) {
 	defer func() {
@@ -133,40 +152,16 @@ func (doc *MedicalDocument) BuildPdf() (data []byte, fileName string, retErr err
 	const rightMargin = 535
 	const textLeftMargin = 38.243
 
-	cell := func(s string) {
-		err := pdf.Cell(nil, s)
-		if err != nil {
-			panic(fmt.Errorf("putting text: %w", err))
-		}
-	}
-
 	section := func(name string) {
 		y := pdf.GetY() + 8
 		pdf.Line(leftMargin, y, rightMargin, y)
 		pdf.SetXY(textLeftMargin, y+12)
-		cell(name)
+		cell(&pdf, name)
 		pdf.Line(leftMargin, y+32, rightMargin, y+32)
 		pdf.SetXY(textLeftMargin, y+41)
 	}
 
-	putData := func(label, data string) {
-		cell(label)
-		pdf.SetXY(textLeftMargin+144, pdf.GetY())
-
-		texts, err := pdf.SplitTextWithWordWrap(data, 350)
-		if err != nil && err != gopdf.ErrEmptyString {
-			panic(fmt.Errorf("splitting text: %w", err))
-		}
-
-		for i, text := range texts {
-			cell(text)
-			if i < len(texts)-1 {
-				pdf.SetXY(textLeftMargin+144, pdf.GetY()+11)
-			}
-		}
-
-		pdf.SetXY(textLeftMargin, pdf.GetY()+14)
-	}
+	
 
 	pdf.SetLineWidth(0.58)
 	pdf.SetLineType("solid")
@@ -182,74 +177,73 @@ func (doc *MedicalDocument) BuildPdf() (data []byte, fileName string, retErr err
 	}
 
 	pdf.SetXY(218.6, 49.6)
-	cell("ПРЕГЛЕД КАРТИЦЕ ЗДРАВСТВЕНОГ ОСИГУРАЊА (КЗО)")
+	cell(&pdf, "ПРЕГЛЕД КАРТИЦЕ ЗДРАВСТВЕНОГ ОСИГУРАЊА (КЗО)")
 
 	pdf.SetY(68)
 	section("Општи подаци о осигуранику")
 
-	putData("Име:", doc.GivenName+" ("+doc.GivenNameLatin+")")
+	putMedicalData(&pdf,textLeftMargin, "Име:", doc.GivenName+" ("+doc.GivenNameLatin+")")
 
-	putData("Име једног родитеља:", doc.ParentName+" ("+doc.ParentNameLatin+")")
+	putMedicalData(&pdf, textLeftMargin, "Име једног родитеља:", doc.ParentName+" ("+doc.ParentNameLatin+")")
 
-	putData("Презиме:", doc.FamilyName+" ("+doc.FamilyNameLatin+")")
+	putMedicalData(&pdf, textLeftMargin, "Презиме:", doc.FamilyName+" ("+doc.FamilyNameLatin+")")	
+	putMedicalData(&pdf, textLeftMargin, "Датум рођења:", doc.DateOfBirth)
 
-	putData("Датум рођења:", doc.DateOfBirth)
+	putMedicalData(&pdf, textLeftMargin, "Место, општина и држава:", doc.GetFullPlaceAddress())
 
-	putData("Место, општина и држава:", doc.GetFullPlaceAddress())
+	putMedicalData(&pdf, textLeftMargin, "Улица:", doc.GetFullStreetAddress())
 
-	putData("Улица:", doc.GetFullStreetAddress())
+	putMedicalData(&pdf, textLeftMargin, "Пол:", doc.Gender)
 
-	putData("Пол:", doc.Gender)
+	putMedicalData(&pdf, textLeftMargin, "Језик:", doc.PrintLanguage)
 
-	putData("Језик:", doc.PrintLanguage)
+	putMedicalData(&pdf, textLeftMargin, "ЛБО:", doc.InsurantNumber)
 
-	putData("ЛБО:", doc.InsurantNumber)
-
-	putData("ЈМБГ:", doc.PersonalNumber)
+	putMedicalData(&pdf, textLeftMargin, "ЈМБГ:", doc.PersonalNumber)
 
 	section("Подаци о картици здравственог осигурања")
 
-	putData("Датум издавања:", doc.DateOfIssue)
+	putMedicalData(&pdf, textLeftMargin, "Датум издавања:", doc.DateOfIssue)
 
-	putData("Датум важења:", doc.DateOfExpiry)
+	putMedicalData(&pdf, textLeftMargin, "Датум важења:", doc.DateOfExpiry)
 
-	putData("Оверена до:", doc.ValidUntil)
+	putMedicalData(&pdf, textLeftMargin, "Оверена до:", doc.ValidUntil)
 
-	putData("Трајно оверена:", localization.FormatYesNo(doc.PermanentlyValid, localization.SrCyrillic))
+	putMedicalData(&pdf, textLeftMargin, "Трајно оверена:", localization.FormatYesNo(doc.PermanentlyValid, localization.SrCyrillic))
 
 	section("Подаци о носиоцу осигурања")
 
-	putData("Име:", doc.CarrierGivenName+" ("+doc.CarrierGivenNameLatin+")")
+	putMedicalData(&pdf, textLeftMargin, "Име:", doc.CarrierGivenName+" ("+doc.CarrierGivenNameLatin+")")
 
-	putData("Презиме:", doc.CarrierFamilyName+" ("+doc.CarrierFamilyName+")")
+	putMedicalData(&pdf, textLeftMargin, "Презиме:", doc.CarrierFamilyName+" ("+doc.CarrierFamilyName+")")
 
-	putData("ЛБО:", doc.CarrierInsurantNumber)
+	putMedicalData(&pdf, textLeftMargin, "ЛБО:", doc.CarrierInsurantNumber)
 
-	putData("ЈМБГ:", doc.CarrierIDNumber)
+	putMedicalData(&pdf, textLeftMargin, "ЈМБГ:", doc.CarrierIDNumber)
 
-	putData("Члан породице:", localization.FormatYesNo(doc.CarrierFamilyMember, localization.SrCyrillic))
+	putMedicalData(&pdf, textLeftMargin, "Члан породице:", localization.FormatYesNo(doc.CarrierFamilyMember, localization.SrCyrillic))
 
-	putData("Сродство:", doc.CarrierRelationship)
+	putMedicalData(&pdf, textLeftMargin, "Сродство:", doc.CarrierRelationship)
 
 	section("Подаци о осигурању")
 
-	putData("Основ осигурања:", doc.InsuranceBasisRZZO)
+	putMedicalData(&pdf, textLeftMargin, "Основ осигурања:", doc.InsuranceBasisRZZO)
 
-	putData("Датум почетка осигурања:", doc.InsuranceStartDate)
+	putMedicalData(&pdf, textLeftMargin, "Датум почетка осигурања:", doc.InsuranceStartDate)
 
-	putData("Опис:", doc.InsuranceDescription)
+	putMedicalData(&pdf, textLeftMargin, "Опис:", doc.InsuranceDescription)
 
 	section("Подаци о обвезнику плаћања доприноса")
 
-	putData("Назив:", doc.TaxpayerName)
+	putMedicalData(&pdf, textLeftMargin, "Назив:", doc.TaxpayerName)
 
-	putData("Седиште:", doc.TaxpayerResidence)
+	putMedicalData(&pdf, textLeftMargin, "Седиште:", doc.TaxpayerResidence)
 
-	putData("Регистарски број:", doc.TaxpayerNumber)
+	putMedicalData(&pdf, textLeftMargin, "Регистарски број:", doc.TaxpayerNumber)
 
-	putData("ПИБ/ЈМБГ:", doc.TaxpayerIDNumber)
+	putMedicalData(&pdf, textLeftMargin, "ПИБ/ЈМБГ:", doc.TaxpayerIDNumber)
 
-	putData("Делатност:", doc.TaxpayerActivityCode)
+	putMedicalData(&pdf, textLeftMargin, "Делатност:", doc.TaxpayerActivityCode)
 
 	fileName = doc.formatFilename() + ".pdf"
 

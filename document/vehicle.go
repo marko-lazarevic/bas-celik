@@ -53,6 +53,53 @@ type VehicleDocument struct {
 	YearOfProduction            string
 }
 
+func putUnderline (pdf *gopdf.GoPdf,underlineOption gopdf.CellOption, str string, size int) {
+		err := pdf.SetFont("liberationsans", "U", size)
+		if err != nil {
+			panic(fmt.Errorf("setting font: %w", err))
+		}
+		err = pdf.CellWithOption(nil, str, underlineOption)
+		if err != nil {
+			panic(fmt.Errorf("cell: %w", err))
+		}
+		err = pdf.SetFont("liberationsans", "B", 12)
+		if err != nil {
+			panic(fmt.Errorf("setting font: %w", err))
+		}
+}
+
+func cell(pdf *gopdf.GoPdf, s string) {
+		err := pdf.Cell(nil, s)
+		if err != nil {
+			panic(fmt.Errorf("putting text: %w", err))
+		}
+	}
+
+func putParagraph (pdf *gopdf.GoPdf, textLeftMargin float64, data string) {
+		texts := strings.Split(data, ",")
+		if len(texts) == 2 {
+			cell(pdf, texts[0] + ",")
+			pdf.SetXY(textLeftMargin, pdf.GetY()+14)
+			cell(pdf, strings.TrimSpace(texts[1]))
+			pdf.SetXY(textLeftMargin, pdf.GetY()+20)
+			return
+		}
+
+		texts, err := pdf.SplitTextWithWordWrap(data, 500)
+		if err != nil && err != gopdf.ErrEmptyString {
+			panic(fmt.Errorf("splitting text: %w", err))
+		}
+
+		for i, text := range texts {
+			cell(pdf, text)
+			if i < len(texts)-1 {
+				pdf.SetXY(textLeftMargin, pdf.GetY()+14)
+			}
+		}
+
+		pdf.SetXY(textLeftMargin, pdf.GetY()+20)
+}
+
 // BuildPdf creates a PDF representation of the VehicleDocument.
 func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr error) {
 	defer func() {
@@ -102,55 +149,8 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 		return str
 	}
 
-	cell := func(s string) {
-		err := pdf.Cell(nil, s)
-		if err != nil {
-			panic(fmt.Errorf("putting text: %w", err))
-		}
-	}
-
 	putData := func(label, data string) {
-		cell(label + ": " + data)
-	}
-
-	putUnderline := func(str string, size int) {
-		err = pdf.SetFont("liberationsans", "U", size)
-		if err != nil {
-			panic(fmt.Errorf("setting font: %w", err))
-		}
-		err = pdf.CellWithOption(nil, str, underlineOption)
-		if err != nil {
-			panic(fmt.Errorf("cell: %w", err))
-		}
-		err = pdf.SetFont("liberationsans", "B", 12)
-		if err != nil {
-			panic(fmt.Errorf("setting font: %w", err))
-		}
-	}
-
-	putParagraph := func(data string) {
-		texts := strings.Split(data, ",")
-		if len(texts) == 2 {
-			cell(texts[0] + ",")
-			pdf.SetXY(textLeftMargin, pdf.GetY()+14)
-			cell(strings.TrimSpace(texts[1]))
-			pdf.SetXY(textLeftMargin, pdf.GetY()+20)
-			return
-		}
-
-		texts, err = pdf.SplitTextWithWordWrap(data, 500)
-		if err != nil && err != gopdf.ErrEmptyString {
-			panic(fmt.Errorf("splitting text: %w", err))
-		}
-
-		for i, text := range texts {
-			cell(text)
-			if i < len(texts)-1 {
-				pdf.SetXY(textLeftMargin, pdf.GetY()+14)
-			}
-		}
-
-		pdf.SetXY(textLeftMargin, pdf.GetY()+20)
+		cell(&pdf, label + ": " + data)
 	}
 
 	err = pdf.SetFont("liberationsans", "B", 29)
@@ -158,7 +158,7 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 		panic(fmt.Errorf("setting font: %w", err))
 	}
 	pdf.SetXY(textLeftMargin, 35)
-	cell("Čitač saobraćajne dozvole")
+	cell(&pdf, "Čitač saobraćajne dozvole")
 
 	pdf.SetLineWidth(2.9)
 	pdf.SetLineType("solid")
@@ -169,7 +169,7 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 	if err != nil {
 		panic(fmt.Errorf("setting font size: %w", err))
 	}
-	cell("Registarska oznaka: " + doc.RegistrationNumberOfVehicle)
+	cell(&pdf, "Registarska oznaka: " + doc.RegistrationNumberOfVehicle)
 
 	pdf.SetXY(textLeftMargin, 145)
 	err = pdf.SetFontSize(12)
@@ -179,14 +179,14 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 
 	putData("Datum izdavanja", doc.IssuingDate)
 	tab()
-	putUnderline("Važi do: "+doc.ExpiryDate, 12)
+	putUnderline(&pdf, underlineOption, "Važi do: "+doc.ExpiryDate, 12)
 	newLine()
 
 	putData("Saobraćajnu izdao", doc.StateIssuing)
 	tab()
 	putData("Zabrana otuđenja", "")
 	newLine()
-	putParagraph(doc.AuthorityIssuing + ",\n" + doc.CompetentAuthority)
+	putParagraph(&pdf, textLeftMargin, doc.AuthorityIssuing + ",\n" + doc.CompetentAuthority)
 
 	putData("Broj saobraćajne", doc.UnambiguousNumber)
 	newLine()
@@ -195,7 +195,7 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 	newLine()
 
 	pdf.SetXY(textLeftMargin, 272)
-	putUnderline("Podaci o vlasniku", 20)
+	putUnderline(&pdf, underlineOption, "Podaci o vlasniku", 20)
 	pdf.SetXY(textLeftMargin, pdf.GetY()+25)
 
 	putData("Vlasnik", doc.OwnersSurnameOrBusinessName)
@@ -223,7 +223,7 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 	newLine()
 
 	pdf.SetXY(textLeftMargin, pdf.GetY()+6)
-	putUnderline("Podaci o vozilu", 20)
+	putUnderline(&pdf, underlineOption, "Podaci o vozilu", 20)
 	pdf.SetXY(textLeftMargin, pdf.GetY()+25)
 
 	putData("Datum prve registracije", doc.DateOfFirstRegistration)
@@ -263,7 +263,7 @@ func (doc *VehicleDocument) BuildPdf() (data []byte, fileName string, retErr err
 
 	putData("Odnos snaga/masa", doc.PowerWeightRatio)
 	tab()
-	cell("Najveća dozvoljena")
+	cell(&pdf, "Najveća dozvoljena")
 	newLine()
 
 	putData("Kategorija", doc.VehicleCategory)

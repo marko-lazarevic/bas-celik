@@ -14,6 +14,58 @@ type Theme struct {
 	dark          bool
 }
 
+var (
+	defaultColor = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x10}
+
+	lightColors = map[fyne.ThemeColorName]color.Color{
+		theme.ColorNameBackground:       color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF},
+		theme.ColorNameButton:           color.NRGBA{R: 0xF0, G: 0xF0, B: 0xF0, A: 0xFF},
+		theme.ColorNameDisabledButton:   color.NRGBA{R: 0xD0, G: 0xD0, B: 0xD0, A: 0xFF},
+		theme.ColorNameDisabled:         color.NRGBA{R: 0x60, G: 0x60, B: 0x60, A: 0xFF},
+		theme.ColorNameError:            color.NRGBA{R: 0xF0, G: 0x47, B: 0x3B, A: 0xFF},
+		theme.ColorNameFocus:            color.NRGBA{R: 0xDE, G: 0xEB, B: 0xFA, A: 0xFF},
+		theme.ColorNameForeground:       color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xFF},
+		theme.ColorNameForegroundOnPrimary: color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF},
+		theme.ColorNameHeaderBackground: color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xFF},
+		theme.ColorNameHover:            color.NRGBA{R: 0x00, G: 0x00, B: 0x40, A: 0x10},
+		theme.ColorNameHyperlink:        color.NRGBA{R: 0x50, G: 0x50, B: 0xA0, A: 0xFF},
+		theme.ColorNameInputBackground:  color.NRGBA{R: 0xF0, G: 0xF0, B: 0xF0, A: 0xFF},
+		theme.ColorNameInputBorder:      color.NRGBA{R: 0xDA, G: 0xDA, B: 0xDA, A: 0xFF},
+		theme.ColorNameMenuBackground:   color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF},
+		theme.ColorNameOverlayBackground: color.NRGBA{R: 0xF9, G: 0xF9, B: 0xF9, A: 0xFF},
+		theme.ColorNamePlaceHolder:      color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xFF},
+		theme.ColorNamePressed:          color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x00},
+		theme.ColorNamePrimary:          color.NRGBA{R: 0x5A, G: 0x73, B: 0x8F, A: 0xFF},
+		theme.ColorNameScrollBar:        color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x99},
+		theme.ColorNameSelection:        color.NRGBA{R: 0xDE, G: 0xEB, B: 0xFA, A: 0xFF},
+		theme.ColorNameShadow:           color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x10},
+	}
+
+	darkColors = map[fyne.ThemeColorName]color.Color{
+		theme.ColorNameBackground:       color.NRGBA{R: 0x10, G: 0x10, B: 0x13, A: 0xFF},
+		theme.ColorNameButton:           color.NRGBA{R: 0x20, G: 0x20, B: 0x20, A: 0xFF},
+		theme.ColorNameDisabledButton:   color.NRGBA{R: 0x12, G: 0x12, B: 0x12, A: 0xFF},
+		theme.ColorNameDisabled:         color.NRGBA{R: 0x40, G: 0x40, B: 0x40, A: 0xFF},
+		theme.ColorNameError:            color.NRGBA{R: 0xF0, G: 0x47, B: 0x3B, A: 0xFF},
+		theme.ColorNameFocus:            color.NRGBA{R: 0x23, G: 0x20, B: 0x24, A: 0xFF},
+		theme.ColorNameForeground:       color.NRGBA{R: 0xD0, G: 0xD0, B: 0xD0, A: 0xFF},
+		theme.ColorNameForegroundOnPrimary: color.NRGBA{R: 0xD9, G: 0xD0, B: 0xD0, A: 0xFF},
+		theme.ColorNameHeaderBackground: color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xFF},
+		theme.ColorNameHover:            color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0x10},
+		theme.ColorNameHyperlink:        color.NRGBA{R: 0x80, G: 0x90, B: 0xF0, A: 0xFF},
+		theme.ColorNameInputBackground:  color.NRGBA{R: 0x20, G: 0x20, B: 0x20, A: 0xFF},
+		theme.ColorNameInputBorder:      color.NRGBA{R: 0xDA, G: 0xDA, B: 0xDA, A: 0x00},
+		theme.ColorNameMenuBackground:   color.NRGBA{R: 0x15, G: 0x15, B: 0x15, A: 0xFF},
+		theme.ColorNameOverlayBackground: color.NRGBA{R: 0x15, G: 0x15, B: 0x17, A: 0xFF},
+		theme.ColorNamePlaceHolder:      color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xFF},
+		theme.ColorNamePressed:          color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x00},
+		theme.ColorNamePrimary:          color.NRGBA{R: 0x41, G: 0x4D, B: 0x7A, A: 0xFF},
+		theme.ColorNameScrollBar:        color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0x50},
+		theme.ColorNameSelection:        color.NRGBA{R: 0x23, G: 0x20, B: 0x24, A: 0xFF},
+		theme.ColorNameShadow:           color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x40},
+	}
+)
+
 // NewTheme creates a new Theme instance based on the user's selection.
 func NewTheme(themeSelection int) Theme {
 	theme := Theme{}
@@ -61,99 +113,15 @@ func (Theme) CornerRadius() float32 {
 }
 
 func lightTheme(c fyne.ThemeColorName) color.Color {
-	switch c {
-	case theme.ColorNameBackground:
-		return color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
-	case theme.ColorNameButton:
-		return color.NRGBA{R: 0xF0, G: 0xF0, B: 0xF0, A: 0xFF}
-	case theme.ColorNameDisabledButton:
-		return color.NRGBA{R: 0xD0, G: 0xD0, B: 0xD0, A: 0xFF}
-	case theme.ColorNameDisabled:
-		return color.NRGBA{R: 0x60, G: 0x60, B: 0x60, A: 0xFF}
-	case theme.ColorNameError:
-		return color.NRGBA{R: 0xF0, G: 0x47, B: 0x3B, A: 0xFF}
-	case theme.ColorNameFocus:
-		return color.NRGBA{R: 0xDE, G: 0xEB, B: 0xFA, A: 0xFF}
-	case theme.ColorNameForeground:
-		return color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xFF}
-	case theme.ColorNameForegroundOnPrimary:
-		return color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
-	case theme.ColorNameHeaderBackground:
-		return color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xFF}
-	case theme.ColorNameHover:
-		return color.NRGBA{R: 0x00, G: 0x00, B: 0x40, A: 0x10}
-	case theme.ColorNameHyperlink:
-		return color.NRGBA{R: 0x50, G: 0x50, B: 0xA0, A: 0xFF}
-	case theme.ColorNameInputBackground:
-		return color.NRGBA{R: 0xF0, G: 0xF0, B: 0xF0, A: 0xFF}
-	case theme.ColorNameInputBorder:
-		return color.NRGBA{R: 0xDA, G: 0xDA, B: 0xDA, A: 0xFF}
-	case theme.ColorNameMenuBackground:
-		return color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
-	case theme.ColorNameOverlayBackground:
-		return color.NRGBA{R: 0xF9, G: 0xF9, B: 0xF9, A: 0xFF}
-	case theme.ColorNamePlaceHolder:
-		return color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xFF}
-	case theme.ColorNamePressed:
-		return color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x00}
-	case theme.ColorNamePrimary:
-		return color.NRGBA{R: 0x5A, G: 0x73, B: 0x8F, A: 0xFF}
-	case theme.ColorNameScrollBar:
-		return color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x99}
-	case theme.ColorNameSelection:
-		return color.NRGBA{R: 0xDE, G: 0xEB, B: 0xFA, A: 0xFF}
-	case theme.ColorNameShadow:
-		return color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x10}
-	default:
-		return color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x10}
+	if col, ok := lightColors[c]; ok {
+		return col
 	}
+	return defaultColor
 }
 
 func darkTheme(c fyne.ThemeColorName) color.Color {
-	switch c {
-	case theme.ColorNameBackground:
-		return color.NRGBA{R: 0x10, G: 0x10, B: 0x13, A: 0xFF}
-	case theme.ColorNameButton:
-		return color.NRGBA{R: 0x20, G: 0x20, B: 0x20, A: 0xFF}
-	case theme.ColorNameDisabledButton:
-		return color.NRGBA{R: 0x12, G: 0x12, B: 0x12, A: 0xFF}
-	case theme.ColorNameDisabled:
-		return color.NRGBA{R: 0x40, G: 0x40, B: 0x40, A: 0xFF}
-	case theme.ColorNameError:
-		return color.NRGBA{R: 0xF0, G: 0x47, B: 0x3B, A: 0xFF}
-	case theme.ColorNameFocus:
-		return color.NRGBA{R: 0x23, G: 0x20, B: 0x24, A: 0xFF}
-	case theme.ColorNameForeground:
-		return color.NRGBA{R: 0xD0, G: 0xD0, B: 0xD0, A: 0xFF}
-	case theme.ColorNameForegroundOnPrimary:
-		return color.NRGBA{R: 0xD9, G: 0xD0, B: 0xD0, A: 0xFF}
-	case theme.ColorNameHeaderBackground:
-		return color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xFF}
-	case theme.ColorNameHover:
-		return color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0x10}
-	case theme.ColorNameHyperlink:
-		return color.NRGBA{R: 0x80, G: 0x90, B: 0xF0, A: 0xFF}
-	case theme.ColorNameInputBackground:
-		return color.NRGBA{R: 0x20, G: 0x20, B: 0x20, A: 0xFF}
-	case theme.ColorNameInputBorder:
-		return color.NRGBA{R: 0xDA, G: 0xDA, B: 0xDA, A: 0x00}
-	case theme.ColorNameMenuBackground:
-		return color.NRGBA{R: 0x15, G: 0x15, B: 0x15, A: 0xFF}
-	case theme.ColorNameOverlayBackground:
-		return color.NRGBA{R: 0x15, G: 0x15, B: 0x17, A: 0xFF}
-	case theme.ColorNamePlaceHolder:
-		return color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xFF}
-	case theme.ColorNamePressed:
-		return color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x00}
-	case theme.ColorNamePrimary:
-		return color.NRGBA{R: 0x41, G: 0x4D, B: 0x7A, A: 0xFF}
-	case theme.ColorNameScrollBar:
-		return color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0x50}
-	case theme.ColorNameSelection:
-		return color.NRGBA{R: 0x23, G: 0x20, B: 0x24, A: 0xFF}
-	case theme.ColorNameShadow:
-		return color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x40}
-	default:
-		return color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x10}
+	if col, ok := darkColors[c]; ok {
+		return col
 	}
+	return defaultColor
 }
